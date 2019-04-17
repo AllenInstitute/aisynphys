@@ -251,7 +251,7 @@ class ExperimentMetadataSubmission(object):
                     '(expected 1). Edit:' + lims_edit_href)
 
             # Check LIMS specimen has flipped field set
-            if self.spec_info['flipped'] not in (True, False):
+            if self.spec_info['flipped'] not in (True, False, 'unknown'):
                 if self.spec_info['organism'] == 'human':
                     # human specimens can be symmetrical enough that "flipped" is meaningless
                     warnings.append("Flipped field was not set for this specimen: %s" % lims_edit_href)
