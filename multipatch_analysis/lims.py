@@ -97,7 +97,7 @@ def specimen_info(specimen_name=None, specimen_id=None):
     # convert organism to more easily searchable form
     rec['organism'] = {'Mus musculus': 'mouse', 'Homo Sapiens': 'human'}[rec['organism']]
     # convert flipped to bool
-    rec['flipped'] = {'flipped': True, 'not flipped': False, 'not checked': None, 'unknown': None}[rec['flipped']]
+    rec['flipped'] = {'flipped': True, 'not flipped': False, 'not checked': None, 'unknown': 'unknown'}.get(rec['flipped'])
     
     # Parse the specimen name to extract more information about the plane of section.
     # Mouse format is:  
