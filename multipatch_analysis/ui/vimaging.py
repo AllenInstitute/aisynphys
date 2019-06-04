@@ -38,6 +38,8 @@ class VImagingAnalyzer(QtGui.QSplitter):
         self.vb2 = self.gw.addViewBox(row=1, col=0)
         self.img2 = pg.ImageItem()
         self.vb2.addItem(self.img2)
+        self.vb2.setXLink(self.vb1) # attempt to link axes of viewboxes 1 and 2
+        self.vb2.setYLink(self.vb1)
         
         for vb in (self.vb1, self.vb2):
             vb.invertY()
@@ -230,7 +232,7 @@ class VImagingAnalyzer(QtGui.QSplitter):
         base = img_data[:, base_starti:base_stopi].mean(axis=0).mean(axis=0)
         test = img_data[:, test_starti:test_stopi].mean(axis=0).mean(axis=0)
 
-        dff = ndimage.median_filter(test - base, 10)
+        dff = ndimage.median_filter(test - base, 4) #10
         self.img2.setImage(dff)
 
     def time_indices(self, time_vals):
