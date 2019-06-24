@@ -1,6 +1,27 @@
 from __future__ import print_function
 import os, re, json
-from allensdk_internal.core import lims_utilities as lims
+from . import config
+import sqlalchemy
+
+
+_lims_engine = None
+def lims_engine():
+    global _lims_engine
+    if _lims_engine is None:
+        from sqlalchemy import create_engine
+        from sqlalchemy.pool import NullPool
+        _lims_engine = create_engine(config.lims_address, poolclass=NullPool)
+    return _lims_engine
+
+
+def query(query_str):
+    conn = lims_engine().connect()
+    try:
+        result = conn.execute(query_str).fetchall()
+    finally:
+        conn.close()
+    return result
+
 
 
 def specimen_info(specimen_name=None, specimen_id=None):
@@ -32,7 +53,7 @@ def specimen_info(specimen_name=None, specimen_id=None):
     """
     
     # Query all interesting information about this specimen from LIMS
-    query = """
+    q = """
         select 
             organisms.name as organism, 
             ages.days as age,
@@ -40,6 +61,7 @@ def specimen_info(specimen_name=None, specimen_id=None):
             donors.full_genotype as genotype,
             donors.weight as weight,
             genders.name as sex,
+            structures.acronym as structure,
             tissue_processings.section_thickness_um as thickness,
             tissue_processings.instructions as section_instructions,
             plane_of_sections.name as plane_of_section,
@@ -54,23 +76,24 @@ def specimen_info(specimen_name=None, specimen_id=None):
             left join organisms on donors.organism_id=organisms.id
             left join ages on donors.age_id=ages.id
             left join genders on donors.gender_id=genders.id
+            left join structures on structures.id=specimens.structure_id
             left join tissue_processings on specimens.tissue_processing_id=tissue_processings.id
             left join plane_of_sections on tissue_processings.plane_of_section_id=plane_of_sections.id
             left join flipped_specimens on flipped_specimens.id = specimens.flipped_specimen_id
     """
     if specimen_name is not None:
         sid = specimen_name.strip()
-        query += "where specimens.name='%s';" % sid
+        q += "where specimens.name='%s';" % sid
     elif specimen_id is not None:
         sid = specimen_id
-        query += "where specimens.id='%d';" % sid
+        q += "where specimens.id='%d';" % sid
     else:
         raise ValueError("Must specify specimen name or ID")
         
-    r = lims.query(query)
+    r = query(q)
     if len(r) != 1:
         raise Exception("LIMS lookup for specimen '%s' returned %d results (expected 1)" % (sid, len(r)))
-    rec = r[0]
+    rec = dict(r[0])
     
     # convert thickness to unscaled
     rec['thickness'] = rec['thickness'] * 1e-6
@@ -168,7 +191,7 @@ def specimen_images(specimen):
 
     # for each image series, get all sub images and decide whether to treat them as 
     # a stack or a set of images with different treatments
-    for image_series in lims.query(q):
+    for image_series in query(q):
         q = """
             select distinct sub_images.id, images.jp2, scans.resolution, treatments.name, slides.storage_directory from image_series
             join sub_images on sub_images.image_series_id=image_series.id
@@ -178,7 +201,7 @@ def specimen_images(specimen):
             left join scans on scans.slide_id=slides.id
             where image_series.id=%d;
             """ % image_series['id']
-        results = lims.query(q)
+        results = query(q)
 
         if image_series['is_stack'] is True:
             image_ids = {}
@@ -225,23 +248,50 @@ def specimen_species(specimen_name):
     left join organisms on donors.organism_id = organisms.id
     where specimens.name = '%s';
     """ % specimen_name
-    r = lims.query(q)
+    r = query(q)
     if len(r) == 0:
         raise ValueError("Could not find donor information")
     return r[0]['species']
 
 
+def specimen_donor_id(specimen):
+    if not isinstance(specimen, int):
+        specimen = specimen_id_from_name(specimen)
+    recs = query("select donor_id from specimens where id='%d'" % specimen)
+    return recs[0]['donor_id']
+        
+
+def donor_medical_conditions(donor_id=None, specimen=None):
+    """Returns a list of medical conditions associated with a donor or specimen.
+    """
+    if specimen is not None:
+        donor_id = specimen_donor_id(specimen)
+    
+    q = """
+    select medical_conditions.name, donor_medical_conditions.value from donor_medical_conditions
+    left join medical_conditions on donor_medical_conditions.medical_condition_id=medical_conditions.id
+    where donor_medical_conditions.donor_id=%d
+    """ % donor_id
+    r = query(q)
+    return [{'name': rec['name'], 'value': rec['value']} for rec in r]
+    
+
 def specimen_id_from_name(spec_name):
     """Return the LIMS ID of a specimen give its name.
     """
-    recs = lims.query("select id from specimens where name='%s'" % spec_name)
+    recs = query("select id from specimens where name='%s'" % spec_name)
     if len(recs) == 0:
         raise ValueError('No LIMS specimen named "%s"' % spec_name)
     return recs[0]['id']
 
+def find_specimen_ids_matching_name(spec_name):
+    """Return a list of LIMS IDs whose names include spec_name"""
+    q = sqlalchemy.text("select id from specimens where name like :name", bindparams=[sqlalchemy.bindparam('name', value='%%%s%%' %spec_name)])
+    recs = query(q)
+    return [r['id'] for r in recs]
 
 def specimen_name(spec_id):
-    recs = lims.query("select name from specimens where id=%s" % spec_id)
+    recs = query("select name from specimens where id=%s" % spec_id)
     if len(recs) == 0:
         raise ValueError('No LIMS specimen with ID %d' % spec_id)
     return recs[0]['name']
@@ -258,7 +308,7 @@ def specimen_ephys_roi_plans(specimen):
     if not isinstance(specimen, int):
         specimen = specimen_id_from_name(specimen)
     
-    recs = lims.query("""
+    recs = query("""
         select 
             ephys_roi_plans.id as ephys_roi_plan_id,
             ephys_specimen_roi_plans.id as ephys_specimen_roi_plan_id,
@@ -289,7 +339,7 @@ def cell_cluster_ids(specimen):
     where specimens.parent_id=%d
     and specimen_types.name='CellCluster'
     """ % specimen
-    recs = lims.query(q)
+    recs = query(q)
     return [rec['id'] for rec in recs]
 
 
@@ -300,7 +350,7 @@ def child_specimens(specimen):
     select id from specimens 
     where specimens.parent_id=%d
     """ % specimen
-    recs = lims.query(q)
+    recs = query(q)
     return [rec['id'] for rec in recs]    
 
 
@@ -309,14 +359,14 @@ def parent_specimen(specimen):
         q = """select parent_id from specimens where specimens.id=%d""" % specimen
     else:
         q = """select parent_id from specimens where specimens.name='%s'""" % specimen
-    recs = lims.query(q)
+    recs = query(q)
     return recs[0]['parent_id']
 
 
 def cell_cluster_data_paths(specimen):
     if not isinstance(specimen, int):
         specimen = specimen_id_from_name(specimen)
-    recs = lims.query("""
+    recs = query("""
         select ephys_roi_results.storage_directory 
         from specimens 
         join ephys_roi_results on ephys_roi_results.id=specimens.ephys_roi_result_id
@@ -328,7 +378,7 @@ def cell_cluster_data_paths(specimen):
 def specimen_metadata(specimen):
     if not isinstance(specimen, int):
         specimen = specimen_id_from_name(specimen)
-    recs = lims.query("select data from specimen_metadata where specimen_id=%d" % specimen)
+    recs = query("select data from specimen_metadata where specimen_id=%d" % specimen)
     if len(recs) == 0:
         return None
     meta = recs[0]['data']
@@ -346,7 +396,7 @@ def specimen_tags(specimen):
     select name from specimen_tags
     join specimen_tags_specimens on specimen_tags_specimens.specimen_tag_id=specimen_tags.id
     where specimen_tags_specimens.specimen_id=%d""" % specimen
-    recs = lims.query(q)
+    recs = query(q)
     return [rec['name'] for rec in recs]
 
 
@@ -359,7 +409,7 @@ def specimen_type(specimen):
     left join specimen_types on specimen_types.id=specimen_types_specimens.specimen_type_id
     where specimens.id=%d
     """ % specimen
-    recs = lims.query(q)
+    recs = query(q)
     return recs[0]['name']
 
 
@@ -385,7 +435,7 @@ def get_incoming_dir(specimen_name):
     left join specimens on projects.id = specimens.project_id
     where specimens.name='%s'
     """ % specimen_name
-    recs = lims.query(q)
+    recs = query(q)
     if recs[0]['incoming_directory'] == None:
         trigger_dir = get_trigger_dir(specimen_name)
         return os.path.dirname(os.path.dirname(trigger_dir))
@@ -401,7 +451,7 @@ def get_trigger_dir(specimen_name):
     left join specimens on projects.id = specimens.project_id
     where specimens.name  = '%s'
     """ % specimen_name
-    recs = lims.query(q)
+    recs = query(q)
     return recs[0]['trigger_dir']
 
 
@@ -508,16 +558,47 @@ def cluster_cells(cluster):
     if not isinstance(cluster, int):
         cluster = specimen_id_from_name(cluster)
     
-    q = """select child.id, child.name, child.x_coord, child.y_coord, child.external_specimen_name, child.ephys_qc_result, biospecimen_polygons.polygon_id
+    q = """select child.id, child.name, child.x_coord, child.y_coord, child.external_specimen_name, child.ephys_qc_result
     from specimens parent 
     left join specimens child on child.parent_id=parent.id
-    left join biospecimen_polygons on biospecimen_polygons.biospecimen_id=child.id
     where parent.id=%d
     """ % cluster
 
-    recs = lims.query(q)
+    recs = query(q)
     return recs
 
+def cell_polygon(cell):
+    """ Return polygon id for cell specimen
+    """ 
+    if not isinstance(cell, int):
+        cell = specimen_id_from_name(cell)
+
+    q = """select polygon_id
+    from biospecimen_polygons
+    where biospecimen_id=%d
+    """ % cell
+
+    recs = query(q)
+    return recs
+
+def cell_layer(cell):
+    """ Return layer call for Cell specimen
+    """
+    if not isinstance(cell, int):
+        cell = specimen_id_from_name(cell)
+
+    q = """select structures.acronym
+    from structures
+    left join specimens on specimens.cortex_layer_id=structures.id
+    where specimens.id=%d
+    """ % cell
+
+    recs = query(q)
+    if len(recs) == 0:
+        return None
+    if len(recs) != 1:
+        raise Exception ('Incorrect number of layers for cell %d' % cell)
+    return recs[0][0]
 
 if __name__ == '__main__':
     # testing specimen

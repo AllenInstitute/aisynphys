@@ -6,8 +6,8 @@ from .morphology import MorphologyPipelineModule
 from .pulse_response import PulseResponsePipelineModule
 from .dynamics import DynamicsPipelineModule
 from .connection_strength import ConnectionStrengthPipelineModule
-from .first_pulse_fit import FirstPulseFitPipelineModule
-
+from .first_pulse_fit import AverageFirstPulseFitPipelineModule
+from .first_pulse_fit import SingleFirstPulseFitPipelineModule
 
 def all_modules():
     """Return an ordered dictionary of {module_name:module_class} pairs, sorted by order of dependencies.

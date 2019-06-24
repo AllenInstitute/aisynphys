@@ -24,7 +24,8 @@ class ExperimentBase(object):
     
     @property
     def cells(self):
-        return {elec.cell.ext_id: elec.cell for elec in self.electrodes if elec.cell is not None}
+        #return {elec.cell.ext_id: elec.cell for elec in self.electrodes if elec.cell is not None}
+        return {cell.ext_id: cell for cell in self.cell_list}
 
     @property
     def pairs(self):
@@ -84,6 +85,7 @@ Experiment = make_table(
         ('target_temperature', 'float', 'The intended temperature of the experiment (but actual recording temperature is stored elsewhere)'),
         ('date', 'datetime', 'The date of this experiment'),
         ('lims_specimen_id', 'int', 'ID of LIMS "CellCluster" specimen.'),
+        #('ext_id', 'str', 'Unique external identifier string for the experiment.')
     ]
 )
 
@@ -144,7 +146,11 @@ Cell.electrode = relationship(Electrode, back_populates="cell", single_parent=Tr
 
 class PairBase(object):
     def __repr__(self):
-        return "<%s %0.3f %d %d>" % (self.__class__.__name__, self.experiment.acq_timestamp, self.pre_cell.ext_id, self.post_cell.ext_id)
+        uid = self.experiment.ext_id
+        if uid is None or uid == '':
+            uid = str('%0.3f'%self.experiment.acq_timestamp if self.experiment.acq_timestamp is not None else None)
+        return "<%s %s %d %d>" % (self.__class__.__name__, uid, self.pre_cell.ext_id, self.post_cell.ext_id)
+
 
 Pair = make_table(
     name='pair',

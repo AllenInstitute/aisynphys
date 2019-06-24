@@ -212,6 +212,22 @@ class Experiment(object):
             self._target_layers = list(target_layers)
         return self._target_layers
 
+    # @property
+    # def region(self):
+    #     # deprecated
+    #     return 'V1' if (not hasattr(self, '_region') or self._region is None) else self._region
+        
+    @property
+    def target_region(self):
+        if self.lims_record['organism'] == 'mouse':
+            # mouse: look up in acq4 metadata
+            rgn = self.expt_info.get('target_region', None)
+            corrected = {'V1': 'VisP'}.get(rgn, rgn)
+            return corrected
+        else:
+            # human: read from LIMS
+            return self.lims_record['structure']
+
     @property
     def labels(self):
         """A list of all fluorophores and other markers used in this experiment."""
@@ -359,7 +375,14 @@ class Experiment(object):
             if self.lims_record['organism'] == 'mouse':
                 if genotype is None:
                     raise Exception("Mouse specimen has no genotype: %s\n  (from %r)" % (self.specimen_name, self))
-                for driver,positive in genotype.predict_driver_expression(colors).items():
+
+                if dye is None:
+                    starting_factors = None
+                else:
+                    genotype.model.add_rule([dye], [dye_color])
+                    starting_factors = [dye]
+                
+                for driver,positive in genotype.predict_driver_expression(colors, starting_factors).items():
                     cell.labels[driver] = positive
 
             # load old QC keys
@@ -680,10 +703,6 @@ class Experiment(object):
         return self._summary
 
     @property
-    def region(self):
-        return 'V1' if (not hasattr(self, '_region') or self._region is None) else self._region
-
-    @property
     def connections_probed(self):
         """A list of probed connections (pre_cell, post_cell) that passed QC.
         """
@@ -957,7 +976,7 @@ class Experiment(object):
                 
             inj = self.injections
             if inj is not None:
-                gt_name += ';' + inj
+                gt_name = ';'.join(gt_name.split(';') + [inj])
                 
             self._genotype = Genotype(gt_name)
         return self._genotype

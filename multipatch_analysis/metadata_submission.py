@@ -187,7 +187,7 @@ class ExperimentMetadataSubmission(object):
             dod = self.spec_info['date_of_birth'].date() + timedelta(self.spec_info['age'])
             days_since_death = (site_date.date() - dod).days
             if days_since_death > 0:
-                warnings.append("Specimen was dissected before today, likely need to update LabTracks info in LIMS")
+                warnings.append("Specimen was dissected before today, likely need to update LabTracks info in LIMS(Date of experiment: %s, Date of death: %s, you decide)" % (site_date.date(), dod))
             if days_since_death < 0:
                 warnings.append("Specimen is from the future, likely need to update LabTracks info in LIMS")
 
@@ -307,6 +307,18 @@ class ExperimentMetadataSubmission(object):
         if acq_plate_well is not None and acq_plate_well.strip() != hist_well:
             errors.append('LIMS histology well name "%s" does not match ACQ4 plate_well_ID "%s"' 
                     % (hist_well, acq_plate_well))
+                    
+        # make sure genotype matches specimen name
+        if self.spec_info['organism'] == 'mouse':
+            if self.spec_info['genotype'] is None:
+                errors.append('Specimen %s has no genotype' % spec_name)
+            else:
+                gt = genotypes.Genotype(self.spec_info['genotype'])
+                for part in gt.driver_lines + gt.reporter_lines:
+                    # Error if the first chunk (usually something like "Ai193" or "Sim1") is not in the specimen name
+                    part = part.partition('(')[0].partition('-')[0]
+                    if part not in spec_name:
+                        errors.append('Specimen name %s does not contain genotype part %s' % (spec_name, part))
 
     def summary(self):
         summ = OrderedDict()

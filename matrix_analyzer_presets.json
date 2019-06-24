@@ -1,0 +1,1064 @@
+{
+    "testing": {
+        "cell classes": {
+            "children": {
+                "Define layer by:": {
+                    "value": "target layer"
+                }, 
+                "Mouse All Cre-types by layer": {
+                    "value": false
+                }, 
+                "Mouse Layer 2/3": {
+                    "value": true
+                }, 
+                "Mouse Layer 4": {
+                    "value": false
+                }, 
+                "Mouse Layer 5": {
+                    "value": false
+                }, 
+                "Mouse Layer 6": {
+                    "value": false
+                }, 
+                "Mouse Inhibitory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse Excitatory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types by layer": {
+                    "value": false
+                }, 
+                "Pyramidal / Nonpyramidal by layer": {
+                    "value": false
+                }, 
+                "Pyramidal by layer": {
+                    "value": false
+                }, 
+                "All cells by layer": {
+                    "value": false
+                }
+            }, 
+            "value": null
+        }, 
+        "log scale": {
+            "value": true
+        }, 
+        "show confidence": {
+            "value": "None"
+        }, 
+        "matrix colormap": {
+            "items": {
+                "connection_probability": {
+                    "field": "connection_probability", 
+                    "children": {
+                        "Min": {
+                            "value": 0.0
+                        }, 
+                        "Max": {
+                            "value": 1.0
+                        }, 
+                        "Operation": {
+                            "value": "Add"
+                        }, 
+                        "Channels..": {
+                            "children": {
+                                "Red": {
+                                    "value": true
+                                }, 
+                                "Green": {
+                                    "value": true
+                                }, 
+                                "Blue": {
+                                    "value": true
+                                }, 
+                                "Alpha": {
+                                    "value": true
+                                }
+                            }, 
+                            "value": null
+                        }, 
+                        "Enabled": {
+                            "value": true
+                        }, 
+                        "NaN": {
+                            "value": [
+                                128, 
+                                128, 
+                                128, 
+                                255
+                            ]
+                        }
+                    }, 
+                    "value": {
+                        "color": [
+                            [
+                                0, 
+                                0, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                80, 
+                                0, 
+                                80, 
+                                255
+                            ], 
+                            [
+                                140, 
+                                0, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                100, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                255, 
+                                255
+                            ]
+                        ], 
+                        "pos": [
+                            0.0, 
+                            0.01, 
+                            0.03, 
+                            0.1, 
+                            0.3, 
+                            1.0
+                        ]
+                    }
+                }
+            }
+        }, 
+        "text format": {
+            "value": "{connected}/{probed}"
+        }, 
+        "data filters": {
+            "children": {
+                "Projects": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "human coarse matrix": {
+                            "value": false
+                        }, 
+                        "mouse_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "mouse V1 pre-production": {
+                            "value": false
+                        }, 
+                        "human_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "human patch-seq": {
+                            "value": false
+                        }, 
+                        "mouse V1 coarse matrix": {
+                            "value": true
+                        }, 
+                        "patch-seq": {
+                            "value": false
+                        }, 
+                        "caspase inhibitor": {
+                            "value": false
+                        }, 
+                        "training": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "ACSF": {
+                    "children": {
+                        "": {
+                            "value": false
+                        }, 
+                        "1.3mM Ca & 1mM Mg": {
+                            "value": false
+                        }, 
+                        "2mM Ca & Mg": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "Internal": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "K-Gluc -EGTA": {
+                            "value": false
+                        }, 
+                        " K-Gluc 1uM EGTA": {
+                            "value": false
+                        }, 
+                        "": {
+                            "value": false
+                        }, 
+                        "mixed": {
+                            "value": false
+                        }, 
+                        "Standard K-Gluc": {
+                            "value": false
+                        }, 
+                        "PatchSeq": {
+                            "value": false
+                        }, 
+                        "K-Gluc 1uM EGTA": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }
+            }, 
+            "value": null
+        }
+    }, 
+    "None": {
+        "cell classes": {
+            "children": {
+                "Define layer by:": {
+                    "value": "target layer"
+                }, 
+                "Mouse All Cre-types by layer": {
+                    "value": false
+                }, 
+                "Mouse Layer 2/3": {
+                    "value": false
+                }, 
+                "Mouse Layer 4": {
+                    "value": false
+                }, 
+                "Mouse Layer 5": {
+                    "value": false
+                }, 
+                "Mouse Layer 6": {
+                    "value": false
+                }, 
+                "Mouse Inhibitory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse Excitatory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types by layer": {
+                    "value": false
+                }, 
+                "Pyramidal / Nonpyramidal by layer": {
+                    "value": false
+                }, 
+                "Pyramidal by layer": {
+                    "value": false
+                }, 
+                "All cells by layer": {
+                    "value": false
+                }
+            }, 
+            "value": null
+        }, 
+        "log scale": {
+            "value": false
+        }, 
+        "show confidence": {
+            "value": "None"
+        }, 
+        "matrix colormap": {
+            "items": {}
+        }, 
+        "text format": {
+            "value": ""
+        }, 
+        "data filters": {
+            "children": {
+                "Projects": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "human coarse matrix": {
+                            "value": false
+                        }, 
+                        "mouse_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "mouse V1 pre-production": {
+                            "value": false
+                        }, 
+                        "human_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "human patch-seq": {
+                            "value": false
+                        }, 
+                        "mouse V1 coarse matrix": {
+                            "value": false
+                        }, 
+                        "patch-seq": {
+                            "value": false
+                        }, 
+                        "caspase inhibitor": {
+                            "value": false
+                        }, 
+                        "training": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "ACSF": {
+                    "children": {
+                        "": {
+                            "value": false
+                        }, 
+                        "1.3mM Ca & 1mM Mg": {
+                            "value": false
+                        }, 
+                        "2mM Ca & Mg": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "Internal": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "K-Gluc -EGTA": {
+                            "value": false
+                        }, 
+                        " K-Gluc 1uM EGTA": {
+                            "value": false
+                        }, 
+                        "": {
+                            "value": false
+                        }, 
+                        "mixed": {
+                            "value": false
+                        }, 
+                        "Standard K-Gluc": {
+                            "value": false
+                        }, 
+                        "PatchSeq": {
+                            "value": false
+                        }, 
+                        "K-Gluc 1uM EGTA": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }
+            }, 
+            "value": null
+        }
+    }, 
+    "Mouse V1 coarse matrix": {
+        "cell classes": {
+            "children": {
+                "Define layer by:": {
+                    "value": "target layer"
+                }, 
+                "Mouse All Cre-types by layer": {
+                    "value": true
+                }, 
+                "Mouse Layer 2/3": {
+                    "value": false
+                }, 
+                "Mouse Layer 4": {
+                    "value": false
+                }, 
+                "Mouse Layer 5": {
+                    "value": false
+                }, 
+                "Mouse Layer 6": {
+                    "value": false
+                }, 
+                "Mouse Inhibitory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse Excitatory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types by layer": {
+                    "value": false
+                }, 
+                "Pyramidal / Nonpyramidal by layer": {
+                    "value": false
+                }, 
+                "Pyramidal by layer": {
+                    "value": false
+                }, 
+                "All cells by layer": {
+                    "value": false
+                }
+            }, 
+            "value": null
+        }, 
+        "log scale": {
+            "value": true
+        }, 
+        "show confidence": {
+            "value": "connection_probability"
+        }, 
+        "matrix colormap": {
+            "items": {
+                "connection_probability": {
+                    "field": "connection_probability", 
+                    "children": {
+                        "Min": {
+                            "value": 0.0
+                        }, 
+                        "Max": {
+                            "value": 1.0
+                        }, 
+                        "Operation": {
+                            "value": "Add"
+                        }, 
+                        "Channels..": {
+                            "children": {
+                                "Red": {
+                                    "value": true
+                                }, 
+                                "Green": {
+                                    "value": true
+                                }, 
+                                "Blue": {
+                                    "value": true
+                                }, 
+                                "Alpha": {
+                                    "value": true
+                                }
+                            }, 
+                            "value": null
+                        }, 
+                        "Enabled": {
+                            "value": true
+                        }, 
+                        "NaN": {
+                            "value": [
+                                128, 
+                                128, 
+                                128, 
+                                255
+                            ]
+                        }
+                    }, 
+                    "value": {
+                        "color": [
+                            [
+                                0, 
+                                0, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                80, 
+                                0, 
+                                80, 
+                                255
+                            ], 
+                            [
+                                140, 
+                                0, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                100, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                255, 
+                                255
+                            ]
+                        ], 
+                        "pos": [
+                            0.0, 
+                            0.01, 
+                            0.03, 
+                            0.1, 
+                            0.3, 
+                            1.0
+                        ]
+                    }
+                }
+            }
+        }, 
+        "text format": {
+            "value": "{connected}/{probed}"
+        }, 
+        "data filters": {
+            "children": {
+                "Projects": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "human coarse matrix": {
+                            "value": false
+                        }, 
+                        "mouse_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "mouse V1 pre-production": {
+                            "value": false
+                        }, 
+                        "human_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "human patch-seq": {
+                            "value": false
+                        }, 
+                        "mouse V1 coarse matrix": {
+                            "value": true
+                        }, 
+                        "patch-seq": {
+                            "value": false
+                        }, 
+                        "caspase inhibitor": {
+                            "value": false
+                        }, 
+                        "training": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "ACSF": {
+                    "children": {
+                        "": {
+                            "value": false
+                        }, 
+                        "1.3mM Ca & 1mM Mg": {
+                            "value": false
+                        }, 
+                        "2mM Ca & Mg": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "Internal": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "K-Gluc -EGTA": {
+                            "value": false
+                        }, 
+                        " K-Gluc 1uM EGTA": {
+                            "value": false
+                        }, 
+                        "": {
+                            "value": false
+                        }, 
+                        "mixed": {
+                            "value": false
+                        }, 
+                        "Standard K-Gluc": {
+                            "value": false
+                        }, 
+                        "PatchSeq": {
+                            "value": false
+                        }, 
+                        "K-Gluc 1uM EGTA": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }
+            }, 
+            "value": null
+        }
+    }, 
+    "Tim's Matrix": {
+        "cell classes": {
+            "children": {
+                "Define layer by:": {
+                    "value": "target layer"
+                }, 
+                "Mouse All Cre-types by layer": {
+                    "value": false
+                }, 
+                "Mouse Layer 2/3": {
+                    "value": true
+                }, 
+                "Mouse Layer 4": {
+                    "value": true
+                }, 
+                "Mouse Layer 5": {
+                    "value": true
+                }, 
+                "Mouse Layer 6": {
+                    "value": true
+                }, 
+                "Mouse Inhibitory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse Excitatory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types by layer": {
+                    "value": false
+                }, 
+                "Pyramidal / Nonpyramidal by layer": {
+                    "value": false
+                }, 
+                "Pyramidal by layer": {
+                    "value": false
+                }, 
+                "All cells by layer": {
+                    "value": false
+                }
+            }, 
+            "value": null
+        }, 
+        "log scale": {
+            "value": true
+        }, 
+        "show confidence": {
+            "value": "connection_probability"
+        }, 
+        "matrix colormap": {
+            "items": {
+                "connection_probability": {
+                    "field": "connection_probability", 
+                    "children": {
+                        "Min": {
+                            "value": 0.0
+                        }, 
+                        "Max": {
+                            "value": 1.0
+                        }, 
+                        "Operation": {
+                            "value": "Add"
+                        }, 
+                        "Channels..": {
+                            "children": {
+                                "Red": {
+                                    "value": true
+                                }, 
+                                "Green": {
+                                    "value": true
+                                }, 
+                                "Blue": {
+                                    "value": true
+                                }, 
+                                "Alpha": {
+                                    "value": true
+                                }
+                            }, 
+                            "value": null
+                        }, 
+                        "Enabled": {
+                            "value": true
+                        }, 
+                        "NaN": {
+                            "value": [
+                                128, 
+                                128, 
+                                128, 
+                                255
+                            ]
+                        }
+                    }, 
+                    "value": {
+                        "color": [
+                            [
+                                0, 
+                                0, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                80, 
+                                0, 
+                                80, 
+                                255
+                            ], 
+                            [
+                                140, 
+                                0, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                100, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                255, 
+                                255
+                            ]
+                        ], 
+                        "pos": [
+                            0.0, 
+                            0.01, 
+                            0.03, 
+                            0.1, 
+                            0.3, 
+                            1.0
+                        ]
+                    }
+                }
+            }
+        }, 
+        "text format": {
+            "value": "{connected}/{probed}"
+        }, 
+        "data filters": {
+            "children": {
+                "Projects": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "human coarse matrix": {
+                            "value": false
+                        }, 
+                        "mouse_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "mouse V1 pre-production": {
+                            "value": true
+                        }, 
+                        "human_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "human patch-seq": {
+                            "value": false
+                        }, 
+                        "mouse V1 coarse matrix": {
+                            "value": true
+                        }, 
+                        "patch-seq": {
+                            "value": false
+                        }, 
+                        "caspase inhibitor": {
+                            "value": false
+                        }, 
+                        "training": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "ACSF": {
+                    "children": {
+                        "": {
+                            "value": false
+                        }, 
+                        "1.3mM Ca & 1mM Mg": {
+                            "value": true
+                        }, 
+                        "2mM Ca & Mg": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "Internal": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "K-Gluc -EGTA": {
+                            "value": false
+                        }, 
+                        " K-Gluc 1uM EGTA": {
+                            "value": false
+                        }, 
+                        "": {
+                            "value": false
+                        }, 
+                        "mixed": {
+                            "value": false
+                        }, 
+                        "Standard K-Gluc": {
+                            "value": false
+                        }, 
+                        "PatchSeq": {
+                            "value": false
+                        }, 
+                        "K-Gluc 1uM EGTA": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }
+            }, 
+            "value": null
+        }
+    }, 
+    "Mouse V1 progress": {
+        "cell classes": {
+            "children": {
+                "Define layer by:": {
+                    "value": "target layer"
+                }, 
+                "Mouse All Cre-types by layer": {
+                    "value": true
+                }, 
+                "Mouse Layer 2/3": {
+                    "value": false
+                }, 
+                "Mouse Layer 4": {
+                    "value": false
+                }, 
+                "Mouse Layer 5": {
+                    "value": false
+                }, 
+                "Mouse Layer 6": {
+                    "value": false
+                }, 
+                "Mouse Inhibitory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse Excitatory Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types": {
+                    "value": false
+                }, 
+                "Mouse E-I Cre-types by layer": {
+                    "value": false
+                }, 
+                "Pyramidal / Nonpyramidal by layer": {
+                    "value": false
+                }, 
+                "Pyramidal by layer": {
+                    "value": false
+                }, 
+                "All cells by layer": {
+                    "value": false
+                }
+            }, 
+            "value": null
+        }, 
+        "log scale": {
+            "value": false
+        }, 
+        "show confidence": {
+            "value": "None"
+        }, 
+        "matrix colormap": {
+            "items": {
+                "matrix_completeness": {
+                    "field": "matrix_completeness", 
+                    "children": {
+                        "Min": {
+                            "value": 0.0
+                        }, 
+                        "Max": {
+                            "value": 1.0
+                        }, 
+                        "Operation": {
+                            "value": "Overlay"
+                        }, 
+                        "Channels..": {
+                            "children": {
+                                "Red": {
+                                    "value": true
+                                }, 
+                                "Green": {
+                                    "value": true
+                                }, 
+                                "Blue": {
+                                    "value": true
+                                }, 
+                                "Alpha": {
+                                    "value": true
+                                }
+                            }, 
+                            "value": null
+                        }, 
+                        "Enabled": {
+                            "value": true
+                        }, 
+                        "NaN": {
+                            "value": [
+                                128, 
+                                128, 
+                                128, 
+                                255
+                            ]
+                        }
+                    }, 
+                    "value": {
+                        "color": [
+                            [
+                                0, 
+                                0, 
+                                100, 
+                                255
+                            ], 
+                            [
+                                80, 
+                                0, 
+                                80, 
+                                255
+                            ], 
+                            [
+                                140, 
+                                0, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                100, 
+                                0, 
+                                255
+                            ], 
+                            [
+                                255, 
+                                255, 
+                                100, 
+                                255
+                            ]
+                        ], 
+                        "pos": [
+                            0.0, 
+                            0.25, 
+                            0.5, 
+                            0.75, 
+                            1.0
+                        ]
+                    }
+                }
+            }
+        }, 
+        "text format": {
+            "value": "{connected}/{probed}"
+        }, 
+        "data filters": {
+            "children": {
+                "Projects": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "human coarse matrix": {
+                            "value": false
+                        }, 
+                        "mouse_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "mouse V1 pre-production": {
+                            "value": false
+                        }, 
+                        "human_mFISH_pilot": {
+                            "value": false
+                        }, 
+                        "human patch-seq": {
+                            "value": false
+                        }, 
+                        "mouse V1 coarse matrix": {
+                            "value": true
+                        }, 
+                        "patch-seq": {
+                            "value": false
+                        }, 
+                        "caspase inhibitor": {
+                            "value": false
+                        }, 
+                        "training": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "ACSF": {
+                    "children": {
+                        "": {
+                            "value": false
+                        }, 
+                        "1.3mM Ca & 1mM Mg": {
+                            "value": false
+                        }, 
+                        "2mM Ca & Mg": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }, 
+                "Internal": {
+                    "children": {
+                        "None": {
+                            "value": false
+                        }, 
+                        "K-Gluc -EGTA": {
+                            "value": false
+                        }, 
+                        " K-Gluc 1uM EGTA": {
+                            "value": false
+                        }, 
+                        "": {
+                            "value": false
+                        }, 
+                        "mixed": {
+                            "value": false
+                        }, 
+                        "Standard K-Gluc": {
+                            "value": false
+                        }, 
+                        "PatchSeq": {
+                            "value": false
+                        }, 
+                        "K-Gluc 1uM EGTA": {
+                            "value": false
+                        }
+                    }, 
+                    "value": null
+                }
+            }, 
+            "value": null
+        }
+    }
+}

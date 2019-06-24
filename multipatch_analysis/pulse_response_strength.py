@@ -98,9 +98,10 @@ def response_query(session):
         db.PulseResponse.ex_qc_pass,
         db.PulseResponse.in_qc_pass,
     )
-    q = q.join(db.StimPulse)
-    q = q.join(db.StimSpike)
-    q = q.join(db.PulseResponse.recording).join(db.PatchClampRecording) 
+    q = q.join(db.StimPulse, db.PulseResponse.stim_pulse)
+    q = q.join(db.StimSpike, db.StimSpike.stim_pulse_id==db.StimPulse.id)
+    q = q.join(db.Recording, db.PulseResponse.recording)
+    q = q.join(db.PatchClampRecording)
 
     # return qc-failed records as well so we can verify qc is working
     #q = q.filter(((db.PulseResponse.ex_qc_pass==True) | (db.PulseResponse.in_qc_pass==True)))
@@ -119,7 +120,8 @@ def baseline_query(session):
         db.Baseline.ex_qc_pass,
         db.Baseline.in_qc_pass,
     )
-    q = q.join(db.Baseline.recording).join(db.PatchClampRecording) 
+    q = q.join(db.Recording, db.Baseline.recording)
+    q = q.join(db.PatchClampRecording, db.PatchClampRecording.recording_id==db.Recording.id)
 
     # return qc-failed records as well so we can verify qc is working
     # q = q.filter(((db.Baseline.ex_qc_pass==True) | (db.Baseline.in_qc_pass==True)))

@@ -34,6 +34,14 @@ class ExperimentPipelineModule(DatabasePipelineModule):
         slice_entry = db.slice_from_timestamp(ts, session=session)
         
         expt_info = expt.expt_info
+        expt_lims_id = lims.expt_cluster_ids(slice_entry.lims_specimen_name, expt.timestamp)
+
+        if len(expt_lims_id) == 1:
+            expt_lims_id = expt_lims_id[0]
+        elif len(expt_lims_id) == 0:
+            expt_lims_id = None
+        else:
+            raise Exception ('Too many LIMS specimens %d' % len(expt_lims_id))
         fields = {
             'original_path': expt.original_path,
             'storage_path': expt.server_path,
@@ -41,10 +49,11 @@ class ExperimentPipelineModule(DatabasePipelineModule):
             'rig_name': expt.rig_name,
             'project_name': expt.project_name,
             'acq_timestamp': expt.timestamp,
-            'target_region': expt_info.get('region'),
+            'target_region': expt.target_region,
             'internal': expt_info.get('internal'),
             'acsf': expt_info.get('solution'),
             'target_temperature': expt.target_temperature,
+            'lims_specimen_id': expt_lims_id,
         }
 
         # Create entry in experiment table
@@ -54,6 +63,7 @@ class ExperimentPipelineModule(DatabasePipelineModule):
 
         # create pipette and cell entries
         cell_entries = {}
+            
         for e_id, elec in expt.electrodes.items():
             elec_entry = db.Electrode(experiment=expt_entry, ext_id=elec.electrode_id, device_id=elec.device_id)
             for k in ['patch_status', 'start_time', 'stop_time',  
@@ -65,6 +75,16 @@ class ExperimentPipelineModule(DatabasePipelineModule):
 
             if elec.cell is not None:
                 cell = elec.cell
+                if expt_lims_id is not None:
+                    cell_specimens = lims.child_specimens(expt_lims_id)
+                    if len(cell_specimens) != 0:
+                        lims_cells = lims.cluster_cells(expt_lims_id)
+                        cell_meta = {}
+                        cell_id_map = {int(lims_cell.external_specimen_name): lims_cell.id for lims_cell in lims_cells if lims_cell is not None}
+                        cell_lims_id = cell_id_map.get(cell.cell_id)
+                        cell_meta['lims_specimen_id'] = cell_lims_id
+                    else:
+                        cell_meta['lims_specimen_id'] = None
                 cell_entry = db.Cell(
                     experiment=expt_entry,
                     electrode=elec_entry,
@@ -74,6 +94,7 @@ class ExperimentPipelineModule(DatabasePipelineModule):
                     is_excitatory=cell.is_excitatory,
                     depth=cell.depth,
                     position=cell.position,
+                    meta=cell_meta
                 )
                 session.add(cell_entry)
                 cell_entries[cell] = cell_entry
@@ -156,7 +177,7 @@ class ExperimentPipelineModule(DatabasePipelineModule):
         n_errors = 0
         ready = OrderedDict()
         for i,yml_path in enumerate(ymls):
-            print("  checking experiment %d/%d\r" % (i, len(ymls)), end='')
+            print("  checking experiment %d/%d          \r" % (i, len(ymls)), end='')
             sys.stdout.flush()
             site_path = os.path.dirname(yml_path)
             try:

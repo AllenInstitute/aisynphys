@@ -19,6 +19,10 @@ SyncRec = make_table(
     ]
 )
 
+Experiment.sync_recs = relationship(SyncRec, order_by=SyncRec.id, back_populates="experiment", cascade='save-update,merge,delete', single_parent=True)
+SyncRec.experiment = relationship(Experiment, back_populates='sync_recs')
+
+
 Recording = make_table(
     name='recording',
     comment= "A recording represents a single contiguous sweep recorded from a single electrode.",
@@ -29,6 +33,13 @@ Recording = make_table(
         ('sample_rate', 'int', 'Sample rate for this recording'),
     ]
 )
+
+SyncRec.recordings = relationship(Recording, order_by=Recording.id, back_populates="sync_rec", cascade='save-update,merge,delete', single_parent=True)
+Recording.sync_rec = relationship(SyncRec, back_populates="recordings")
+
+Electrode.recordings = relationship(Recording, back_populates="electrode", cascade='save-update,merge,delete', single_parent=True)
+Recording.electrode = relationship(Electrode, back_populates="recordings")
+
 
 PatchClampRecording = make_table(
     name='patch_clamp_recording',
@@ -46,6 +57,10 @@ PatchClampRecording = make_table(
     ]
 )
 
+Recording.patch_clamp_recording = relationship(PatchClampRecording, back_populates="recording", cascade='save-update,merge,delete', single_parent=True, uselist=False)
+PatchClampRecording.recording = relationship(Recording, back_populates="patch_clamp_recording", single_parent=True)
+
+
 MultiPatchProbe = make_table(
     name='multi_patch_probe',
     comment="Extra data for multipatch recordings intended to test synaptic dynamics.",
@@ -56,6 +71,10 @@ MultiPatchProbe = make_table(
         ('n_spikes_evoked', 'int', 'The number of presynaptic spikes evoked'),
     ]
 )
+
+PatchClampRecording.multi_patch_probe = relationship(MultiPatchProbe, back_populates="patch_clamp_recording", cascade='save-update,merge,delete', single_parent=True)
+MultiPatchProbe.patch_clamp_recording = relationship(PatchClampRecording, back_populates="multi_patch_probe")
+
 
 TestPulse = make_table(
     name='test_pulse',
@@ -74,8 +93,15 @@ TestPulse = make_table(
     ]
 )
 
+Electrode.test_pulses = relationship(TestPulse, back_populates='electrode', cascade='save-update,merge,delete', single_parent=True)
+TestPulse.electrode = relationship(Electrode, back_populates="test_pulses")
+Recording.test_pulses = relationship(TestPulse, back_populates='recording', cascade='save-update,merge,delete', single_parent=True)
+TestPulse.recording = relationship(Recording, back_populates="test_pulses")
+PatchClampRecording.nearest_test_pulse = relationship(TestPulse, single_parent=True, foreign_keys=[PatchClampRecording.nearest_test_pulse_id])
+
+
 class StimPulseBase(object):
-    def __init__(self):
+    def _init_on_load(self):
         self._rec_tseries = None
         self._stim_tseries = None
     
@@ -116,6 +142,9 @@ StimPulse = make_table(
     ]
 )
 
+Recording.stim_pulses = relationship(StimPulse, back_populates="recording", cascade='save-update,merge,delete', single_parent=True)
+StimPulse.recording = relationship(Recording, back_populates="stim_pulses")
+
 
 StimSpike = make_table(
     name='stim_spike',
@@ -130,9 +159,12 @@ StimSpike = make_table(
     ]
 )
 
+StimSpike.stim_pulse = relationship(StimPulse, back_populates="spikes")
+StimPulse.spikes = relationship(StimSpike, back_populates="stim_pulse", single_parent=True)
+
 
 class PulseResponseBase(object):
-    def __init__(self):
+    def _init_on_load(self):
         self._post_tseries = None
     
     @property
@@ -164,6 +196,12 @@ PulseResponse = make_table(
     ]
 )
 
+StimPulse.pulse_response = relationship(PulseResponse, back_populates="stim_pulse", cascade='save-update,merge,delete', single_parent=True)
+PulseResponse.stim_pulse = relationship(StimPulse)
+PulseResponse.recording = relationship(Recording)
+Pair.pulse_responses = relationship(PulseResponse, back_populates='pair', single_parent=True)
+PulseResponse.pair = relationship(Pair, back_populates='pulse_responses')
+
 
 Baseline = make_table(
     name='baseline',
@@ -178,45 +216,8 @@ Baseline = make_table(
     ]
 )
 
-
-# Set up relationships
-Experiment.sync_recs = relationship(SyncRec, order_by=SyncRec.id, back_populates="experiment", cascade='save-update,merge,delete', single_parent=True)
-SyncRec.experiment = relationship(Experiment, back_populates='sync_recs')
-
-SyncRec.recordings = relationship(Recording, order_by=Recording.id, back_populates="sync_rec", cascade='save-update,merge,delete', single_parent=True)
-Recording.sync_rec = relationship(SyncRec, back_populates="recordings")
-
-Electrode.recordings = relationship(Recording, back_populates="electrode", cascade='save-update,merge,delete', single_parent=True)
-Recording.electrode = relationship(Electrode, back_populates="recordings")
-
-Recording.patch_clamp_recording = relationship(PatchClampRecording, back_populates="recording", cascade='save-update,merge,delete', single_parent=True, uselist=False)
-PatchClampRecording.recording = relationship(Recording, back_populates="patch_clamp_recording", single_parent=True)
-
-PatchClampRecording.multi_patch_probe = relationship(MultiPatchProbe, back_populates="patch_clamp_recording", cascade='save-update,merge,delete', single_parent=True)
-MultiPatchProbe.patch_clamp_recording = relationship(PatchClampRecording, back_populates="multi_patch_probe")
-
-Electrode.test_pulses = relationship(TestPulse, back_populates='electrode', cascade='save-update,merge,delete', single_parent=True)
-TestPulse.electrode = relationship(Electrode, back_populates="test_pulses")
-Recording.test_pulses = relationship(TestPulse, back_populates='recording', cascade='save-update,merge,delete', single_parent=True)
-TestPulse.recording = relationship(Recording, back_populates="test_pulses")
-
-PatchClampRecording.nearest_test_pulse = relationship(TestPulse, single_parent=True, foreign_keys=[PatchClampRecording.nearest_test_pulse_id])
-#TestPulse.patch_clamp_recording = relationship(PatchClampRecording)
-
-Recording.stim_pulses = relationship(StimPulse, back_populates="recording", cascade='save-update,merge,delete', single_parent=True)
-StimPulse.recording = relationship(Recording, back_populates="stim_pulses")
-
-StimSpike.pulse = relationship(StimPulse, back_populates="spikes")
-StimPulse.spikes = relationship(StimSpike, back_populates="pulse", single_parent=True)
-StimPulse.pulse_response = relationship(PulseResponse, back_populates="stim_pulse", cascade='save-update,merge,delete', single_parent=True)
-
 Recording.baselines = relationship(Baseline, back_populates="recording", cascade='save-update,merge,delete', single_parent=True)
 Baseline.recording = relationship(Recording, back_populates="baselines")
-
-PulseResponse.recording = relationship(Recording)
-PulseResponse.stim_pulse = relationship(StimPulse)
-Pair.pulse_responses = relationship(PulseResponse, back_populates='pair', single_parent=True)
-PulseResponse.pair = relationship(Pair, back_populates='pulse_responses')
 
 
 dataset_tables = TableGroup([SyncRec, Recording, PatchClampRecording, MultiPatchProbe, TestPulse, StimPulse, Baseline, StimSpike, PulseResponse])

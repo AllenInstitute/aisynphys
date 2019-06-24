@@ -31,4 +31,10 @@ INJECTIONS = {
     'RO Fam84b-FlpO': 'Fam84b-FlpO',
     'RO tdTomato+GFP': 'pAAV-Ef1a-fDIO-EGFP;pAAV-Ef1a-cDIO-dTomato',
     'pan-GABA': 'rAAV-Dlx2.0-SYFP2',
+    'CN1466': 'rAAV-eHGT_078m-minBglobin-SYFP2-WPRE3-BGHpA',
+    'CN1827': 'rAAV-3xhI56icore-minBG-tdTomato-WPRE3-BGHpA',
+    'CN1466 and CN1827': 'rAAV-eHGT_078m-minBglobin-SYFP2-WPRE3-BGHpA;rAAV-3xhI56icore-minBG-tdTomato-WPRE3-BGHpA',
+    'CN1461': 'rAAV-eHGT_073m-minBglobin-SYFP2-WPRE3-BGHpA',
+    'CN1988 and CN1913': 'rAAV-EF1a-fDIO-EGFP-WPRE-HGHpA;rAAV-eHGT_078m-minBG-FlpO-WPRE-HGHpA',
+    'CN1849': 'rAAV-3xHGT_073m(core)-minBG-SYFP2-WPRE3-BGHpA'
 }

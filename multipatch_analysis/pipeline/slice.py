@@ -36,6 +36,8 @@ class SlicePipelineModule(DatabasePipelineModule):
 
         # Interpret slice time
         slice_time = parent_info.get('time_of_dissection', None)
+        if slice_time == '':
+            slice_time = None
         if slice_time is not None:
             m = re.match(r'((20\d\d)-(\d{1,2})-(\d{1,2}) )?(\d+):(\d+)', slice_time.strip())
             if m is not None:
@@ -47,14 +49,14 @@ class SlicePipelineModule(DatabasePipelineModule):
                     slice_time = datetime(int(year), int(mon), int(day), int(hh), int(mm))
 
         # construct full genotype string 
-        genotype = limsdata['genotype']
+        genotype = limsdata['genotype'] or ''
         for info in (parent_info, info):
             inj = info.get('injections')
             if inj in (None, ''):
                 continue
             if inj not in constants.INJECTIONS:
                 raise KeyError("Injection %r is unknown in constants.INJECTIONS" % inj)
-            genotype = genotype + ';' + constants.INJECTIONS[inj]
+            genotype = ';'.join(genotype.split(';') + [constants.INJECTIONS[inj]])
 
         fields = {
             'acq_timestamp': info['__timestamp__'],

@@ -48,6 +48,8 @@ class ExperimentBrowser(pg.TreeWidget):
                 pair_item.pair = pair
                 pair_item.expt = expt
                 self.items_by_pair_id[pair.id] = pair_item
+                # also allow select by ext id
+                self.items_by_pair_id[(expt.acq_timestamp, pair.pre_cell.ext_id, pair.post_cell.ext_id)] = pair_item
                 
         self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
                 

@@ -32,6 +32,7 @@ def get_amps(session, pair, clamp_mode='ic', get_data=False):
         db.PulseResponseStrength.crosstalk,
         db.PulseResponse.ex_qc_pass,
         db.PulseResponse.in_qc_pass,
+        db.PatchClampRecording.qc_pass,
         db.PatchClampRecording.clamp_mode,
         db.PatchClampRecording.baseline_potential,
         db.PatchClampRecording.baseline_current,
@@ -43,7 +44,7 @@ def get_amps(session, pair, clamp_mode='ic', get_data=False):
         cols.append(db.PulseResponse.data)
 
     q = session.query(*cols)
-    q = q.join(db.PulseResponse)
+    q = q.join(db.PulseResponse, db.PulseResponseStrength.pulse_response)
     
     q, pre_rec, post_rec = join_pulse_response_to_expt(q)
     q = q.join(db.StimSpike)
@@ -53,7 +54,9 @@ def get_amps(session, pair, clamp_mode='ic', get_data=False):
         (pre_rec.electrode==pair.pre_cell.electrode,),
         (post_rec.electrode==pair.post_cell.electrode,),
         (db.PatchClampRecording.clamp_mode==clamp_mode,),
-        (db.PatchClampRecording.qc_pass==True,),
+        # Return all results, regardless of QC -- we want to see what is being excluded later on.
+        # Also note that the ex_qc_pass and in_qc_pass fields returned above already take p_c_recording.qc_pass into account.
+        # (db.PatchClampRecording.qc_pass==True,),
     ]
     for filter_args in filters:
         q = q.filter(*filter_args)
@@ -83,6 +86,7 @@ def get_baseline_amps(session, pair, clamp_mode='ic', amps=None, get_data=True):
         db.BaselineResponseStrength.crosstalk,
         db.Baseline.ex_qc_pass,
         db.Baseline.in_qc_pass,
+        db.PatchClampRecording.qc_pass,
         db.PatchClampRecording.clamp_mode,
         db.PatchClampRecording.baseline_potential,
         db.PatchClampRecording.baseline_current,
@@ -93,12 +97,16 @@ def get_baseline_amps(session, pair, clamp_mode='ic', amps=None, get_data=True):
         cols.append(db.Baseline.data)
         
     q = session.query(*cols)
-    q = q.join(db.Baseline).join(db.Recording).join(db.PatchClampRecording).join(db.SyncRec).join(db.Experiment)
+    q = q.join(db.Baseline, db.BaselineResponseStrength.baseline)
+    q = q.join(db.Recording)
+    q = q.join(db.PatchClampRecording)
+    q = q.join(db.SyncRec)
+    q = q.join(db.Experiment)
     
     filters = [
         (db.Recording.electrode==pair.post_cell.electrode,),
         (db.PatchClampRecording.clamp_mode==clamp_mode,),
-        (db.PatchClampRecording.qc_pass==True,),
+        # (db.PatchClampRecording.qc_pass==True,),
     ]
     for filter_args in filters:
         q = q.filter(*filter_args)
@@ -194,6 +202,15 @@ def analyze_pair_connectivity(amps, sign=None):
        and background distributions for amplitude, deconvolved amplitude, and
        deconvolved latency    
     """
+    # Filter by QC
+    for k,v in amps.items():
+        mask = v['qc_pass'].astype(bool)
+        amps[k] = v[mask]
+    
+    # See if any data remains
+    if all([len(a) == 0 for a in amps]):
+        return None
+
     requested_sign = sign
     fields = {}  # used to fill the new DB record
     

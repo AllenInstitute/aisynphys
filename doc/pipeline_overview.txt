@@ -1,0 +1,40 @@
+Multipatch Analysis Pipeline Overview
+=====================================
+
+First, util/analysis_pipeline.py is the starting point for importing to the database or performing analysis whose results go back into the database. 
+
+The pipeline system as a whole takes care of things like:
+- deciding which jobs need to be run (or re-run) and in which order
+- running jobs in parallel with progress reports
+- keeping track of which jobs passed or failed (and why)
+
+There are a few different ways to use the analysis_pipeline script:
+- automatically update everything that is ready to update
+- automatically update everything that is downstream of a particular pipeline module
+- remove all results from a pipeline module (also removes downstream results, but leaves upstream results alone)
+- remove or re-process all results for a particular experiment
+- lots of options to make debugging easier
+
+We have an analysis _pipeline_, which consists of several different modules (each with dependencies and outputs), where each module loads some data, grinds it up, and writes results back to the database. 
+Examples: 
+    - The `experiment` module loads experiment metadata and adds new records   to the `experiment`, `electrode`, `cell`, and `pair` tables. 
+    - The `dataset` loads NWB files and populates the `recording`, `stim_pulse`, `pulse_response`, etc. tables
+    - The `connection_strength` module loads data about pulse responses and comes up with per-pair metrics about the strength of each connection.
+
+Each module has 2 parts:
+- a DB schema that lives in `mp_a/database/`
+- a PipelineModule class in `mp_a/pipeline/`
+The pipeline modules implement things like:
+- a function for processing a single job (where one "job" is usually one experiment)
+- a function for determining which jobs need to be updated (either because new data has been acquired, or because a previous upstream job result has changed)
+- a function for removing the results of a job from the database
+
+So far this is all automated. The only user interaction is in the util/analysis_pipeline.py script that decides which jobs to run. Any analysis that requires user interaction is done outside of the pipeline and generates a file that lives alongside the raw data (eg: pipettes.yml). These files are later picked up by pipeline modules for import into the DB.
+
+
+Examples:
+
+python util/analysis_pipeline.py :experiment
+    -- The `:experiment` bit means "run everything in the pipeline up to `experiment` (which should just be `slice` and `experiment`)
+
+    

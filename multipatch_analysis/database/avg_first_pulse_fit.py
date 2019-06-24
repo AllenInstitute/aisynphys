@@ -2,18 +2,18 @@ from sqlalchemy.orm import relationship
 from .database import make_table, TableGroup
 from .experiment import Pair
 
-
-__all__ = ['first_pulse_fit_tables', 'AvgFirstPulseFit']
+__all__ = ['avg_first_pulse_fit_table', 'AvgFirstPulseFit']
 
 
 AvgFirstPulseFit = make_table(
     name='avg_first_pulse_fit',
     comment="""Contains results of psp_fit on spike aligned, average first pulse PSP for each
-            connection that passed qc in current clamp. During the fit the latency is forced
-            to be the value +/-.5 ms found via fitting all of the pulses (available in the 
+            connection that passed qc in current clamp. The latency is forced
+            to be within +/-.5 ms to the found fitting all of the pulses in the train (available in the 
             connection_strength.ic_fit_xoffset). The heavily weighted section (meant to 
             place more importance of the wave form during the rise time) is shifted to 
             begin at the latency. Created via fit_average_first_pulse.py. 
+
             All units in SI.""",
     columns=[
         ('pair_id', 'pair.id', 'The ID of the entry in the pair table to which these results apply', {'index': True}),
@@ -48,7 +48,10 @@ AvgFirstPulseFit = make_table(
     ]
 )
 
+
+
+
 Pair.avg_first_pulse_fit = relationship(AvgFirstPulseFit, back_populates="pair", cascade="delete", single_parent=True, uselist=False)
 AvgFirstPulseFit.pair = relationship(Pair, back_populates="avg_first_pulse_fit", single_parent=True)
 
-first_pulse_fit_tables = TableGroup([AvgFirstPulseFit])
+avg_first_pulse_fit_table = TableGroup([AvgFirstPulseFit])

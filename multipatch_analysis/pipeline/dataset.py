@@ -167,7 +167,7 @@ class DatasetPipelineModule(DatabasePipelineModule):
                         pulse.n_spikes = 0
                     
                     spike_entry = db.StimSpike(
-                        pulse=pulse,
+                        stim_pulse=pulse,
                         **extra
                     )
                     session.add(spike_entry)

@@ -32,12 +32,12 @@ class ConnectionStrengthPipelineModule(DatabasePipelineModule):
                 amps[clamp_mode, 'fg'] = clamp_mode_fg
                 amps[clamp_mode, 'bg'] = clamp_mode_bg
             
-            if all([len(a) == 0 for a in amps]):
-                # nothing to analyze here.
-                continue
-
             # Generate summary results for this pair
             results = analyze_pair_connectivity(amps)
+            
+            if results is None:
+                # no data to analyze
+                continue
 
             # Write new record to DB
             conn = db.ConnectionStrength(pair_id=pair.id, **results)

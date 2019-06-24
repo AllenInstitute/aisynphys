@@ -95,6 +95,9 @@ class MultiPatchMosaicEditorExtension(QtGui.QWidget):
         self.layout.addWidget(self.submit_btn, 1, 0)
         self.submit_btn.clicked.connect(self.submit)
 
+        self.map_no_go = QtGui.QCheckBox("Cell map no go")
+        self.layout.addWidget(self.map_no_go)
+
     def load_clicked(self):
         """
         Checks that directory is pointed at a slice
@@ -146,105 +149,111 @@ class MultiPatchMosaicEditorExtension(QtGui.QWidget):
         Checks that markers are loaded into the canvas
         Gets timestamp
         Creates dictionary of cell locations and enables the save button
+        If the cluster is unmappable (no stained cells, damage, etc.) the json will submit cell_map_no_go to specimen tags
         """
 
-        items = self.mosaic_editor.canvas.items
-        image_20 = lims.specimen_20x_image(self.specimen_name, treatment='Biocytin')
+        cell_map_no_go = self.map_no_go.isChecked()
+        if cell_map_no_go is True:
+            self.data = {}
+            self.data['cell map no go'] = cell_map_no_go
+        else:
+            items = self.mosaic_editor.canvas.items
+            image_20 = lims.specimen_20x_image(self.specimen_name, treatment='Biocytin')
 
-        # Find item that marks cell positions
-        markers = [i for i in items if isinstance(i, MarkersCanvasItem)]
-        if len(markers) != 1:
-            raise Exception("Must have exactly 1 Markers item in the canvas.")
+            # Find item that marks cell positions
+            markers = [i for i in items if isinstance(i, MarkersCanvasItem)]
+            if len(markers) != 1:
+                raise Exception("Must have exactly 1 Markers item in the canvas.")
+            
+            # Find the 20x image that was loaded in to the editor and make sure it's the right
+            # one for this specimen
+            image = None
+            if image_20 is not None:
+                for i in items:
+                    try:
+                        if os.path.split(i.opts['handle'].name())[-1] == os.path.split(image_20)[-1]:
+                            image = i
+                    except AttributeError:
+                        pass
+            # if image is None:
+            #     raise Exception("Could not find 20x image loaded into mosaic editor.")
+
+            # Infer the site folder to submit from based on the files that have been loaded.
+            # This is really indirect, but it seems to work.
+            sites = set()
+            for item in items:
+                handle = item.opts.get('handle')
+                if handle is None:
+                    continue
+                parent = handle.parent()
+                if parent.shortName().startswith('site_'):
+                    sites.add(parent)
+            if len(sites) == 0:
+                raise Exception("No files loaded from site; can't determine which site to submit.")
+            if len(sites) > 1:
+                raise Exception("Files loaded from multiple sites; can't determine which site to submit.")
+            self.site_dh = list(sites)[0]
+
+            # Grab the timestamp for this site; we need it to look up the cell cluster from LIMS
+            ts = self.site_dh.info()['__timestamp__']
+
+            # Find the LIMS CellCluster ID for this experiment 
+            cluster_ids = lims.expt_cluster_ids(self.specimen_name, ts)
+            if len(cluster_ids) == 0:
+                raise Exception("No CellCluster found for %s %s" % (self.specimen_name, ts))
+            if len(cluster_ids) > 1:
+                raise Exception("Multiple CellClusters found for %s %s" % (self.specimen_name, ts))
+            self.cluster_id = cluster_ids[0]
+            self.cluster_name = lims.specimen_name(self.cluster_id)
+
+            # Load up the piettes.yml file so we know which cells are considered "ephys pass"
+            pipette_path = os.path.join(self.site_dh.name(), 'pipettes.yml')
+            if not os.path.exists(pipette_path):
+                raise Exception("Could not find pipettes.yml")
+            pipette_log = yaml.load(open(pipette_path))
+
+            # grab info about cell positions from Markers
+            pipettes = markers[0].saveState()['markers']
+
+            # Construct JSON to send to LIMS.
+            self.data = {}  
+            self.data['cells'] = []
+            for cell in pipettes:
+                cell_name = int(cell[0].split('_')[-1])
+                p = cell[1]
+                if image is None:
+                    x_float = 0
+                    y_float = 0
+                else:
+                    x_float = markers[0].graphicsItem().mapToItem(image.graphicsItem(), pg.Point(*p[:2])).x()
+                    y_float = markers[0].graphicsItem().mapToItem(image.graphicsItem(), pg.Point(*p[:2])).y()
+                self.data['cells'].append({      
+                    'ephys_cell_id': cell_name,                  
+                    'coordinates_20x': 
+                    {
+                    "x": int(round(x_float)),   # round the float and change to integer for technology requirements
+                    "y": int(round(y_float))    # round the float and change to integer for technology requirements
+                    },      
+                    'ephys_qc_result': ('pass' if pipette_log[cell_name]['got_data'] == True else 'fail'),                 
+                    'start_time_sec': time.mktime(pipette_log[cell_name]['patch_start'].timetuple())
+                })
+
+            # check that position values written to self.data are non-zero, if they are ask the user if it's ok to submit
+            x_pos = all([cell['coordinates_20x']['x'] for cell in self.data['cells']]) != 0
+            y_pos = all([cell['coordinates_20x']['y'] for cell in self.data['cells']]) != 0
+            if x_pos is False or y_pos is False:
+                ret = QtGui.QMessageBox.question(self, "Position Check", "x and/or y position values are 0.\n"
+                    "Do you still want to submit?", QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+                # postionValueMsg = QMessageBox()
+                # postionValueMsg.setText('x and/or y position values are 0')
+                # positionValueMsg.setInformativeText('Do you still want to submit?')
+                # positionValueMsg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+                # answer = positionValueMsg.exec_()
+
+                if ret == QtGui.QMessageBox.Cancel:
+                    raise Exception ('Submission Cancelled')
         
-        # Find the 20x image that was loaded in to the editor and make sure it's the right
-        # one for this specimen
-        image = None
-        if image_20 is not None:
-            for i in items:
-                try:
-                    if os.path.split(i.opts['handle'].name())[-1] == os.path.split(image_20)[-1]:
-                        image = i
-                except AttributeError:
-                    pass
-        # if image is None:
-        #     raise Exception("Could not find 20x image loaded into mosaic editor.")
-
-        # Infer the site folder to submit from based on the files that have been loaded.
-        # This is really indirect, but it seems to work.
-        sites = set()
-        for item in items:
-            handle = item.opts.get('handle')
-            if handle is None:
-                continue
-            parent = handle.parent()
-            if parent.shortName().startswith('site_'):
-                sites.add(parent)
-        if len(sites) == 0:
-            raise Exception("No files loaded from site; can't determine which site to submit.")
-        if len(sites) > 1:
-            raise Exception("Files loaded from multiple sites; can't determine which site to submit.")
-        self.site_dh = list(sites)[0]
-
-        # Grab the timestamp for this site; we need it to look up the cell cluster from LIMS
-        ts = self.site_dh.info()['__timestamp__']
-
-        # Find the LIMS CellCluster ID for this experiment 
-        cluster_ids = lims.expt_cluster_ids(self.specimen_name, ts)
-        if len(cluster_ids) == 0:
-            raise Exception("No CellCluster found for %s %s" % (self.specimen_name, ts))
-        if len(cluster_ids) > 1:
-            raise Exception("Multiple CellClusters found for %s %s" % (self.specimen_name, ts))
-        self.cluster_id = cluster_ids[0]
-        self.cluster_name = lims.specimen_name(self.cluster_id)
-
-        # Load up the piettes.yml file so we know which cells are considered "ephys pass"
-        pipette_path = os.path.join(self.site_dh.name(), 'pipettes.yml')
-        if not os.path.exists(pipette_path):
-            raise Exception("Could not find pipettes.yml")
-        pipette_log = yaml.load(open(pipette_path))
-
-        # grab info about cell positions from Markers
-        pipettes = markers[0].saveState()['markers']
-
-        # Construct JSON to send to LIMS.
-        self.data = {}  
-        self.data['cells'] = []
-        for cell in pipettes:
-            cell_name = int(cell[0].split('_')[-1])
-            p = cell[1]
-            if image is None:
-                x_float = 0
-                y_float = 0
-            else:
-                x_float = markers[0].graphicsItem().mapToItem(image.graphicsItem(), pg.Point(*p[:2])).x()
-                y_float = markers[0].graphicsItem().mapToItem(image.graphicsItem(), pg.Point(*p[:2])).y()
-            self.data['cells'].append({      
-                'ephys_cell_id': cell_name,                  
-                'coordinates_20x': 
-                {
-                "x": int(round(x_float)),   # round the float and change to integer for technology requirements
-                "y": int(round(y_float))    # round the float and change to integer for technology requirements
-                },      
-                'ephys_qc_result': ('pass' if pipette_log[cell_name]['got_data'] == True else 'fail'),                 
-                'start_time_sec': time.mktime(pipette_log[cell_name]['patch_start'].timetuple())
-            })
-
-        # check that position values written to self.data are non-zero, if they are ask the user if it's ok to submit
-        x_pos = all([cell['coordinates_20x']['x'] for cell in self.data['cells']]) != 0
-        y_pos = all([cell['coordinates_20x']['y'] for cell in self.data['cells']]) != 0
-        if x_pos is False or y_pos is False:
-            ret = QtGui.QMessageBox.question(self, "Position Check", "x and/or y position values are 0.\n"
-                "Do you still want to submit?", QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
-            # postionValueMsg = QMessageBox()
-            # postionValueMsg.setText('x and/or y position values are 0')
-            # positionValueMsg.setInformativeText('Do you still want to submit?')
-            # positionValueMsg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-
-            # answer = positionValueMsg.exec_()
-
-            if ret == QtGui.QMessageBox.Cancel:
-                raise Exception ('Submission Cancelled')
-
         
     def save_json_and_trigger(self):
         """

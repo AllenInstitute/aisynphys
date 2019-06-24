@@ -354,7 +354,11 @@ class ImageTreeItem(TypeSelectItem):
         TypeSelectItem.__init__(self, ui, fh, types, typ)
         
         self.setText(2, obj)
-        colors = info.get('illumination', {}).keys()
+        illumination = info.get('illumination', {})
+        if illumination is not None:
+            colors = list(illumination.keys())
+        else:
+            colors = []
         if len(colors) == 0:
             color = 'w'
         elif len(colors) > 1:

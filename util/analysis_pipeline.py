@@ -1,5 +1,5 @@
 from __future__ import print_function
-import argparse, sys, os
+import argparse, sys, os, logging
 import pyqtgraph as pg 
 from multipatch_analysis.pipeline import all_modules
 import multipatch_analysis.database as db
@@ -7,6 +7,8 @@ from multipatch_analysis import config
 
 
 if __name__ == '__main__':
+    logging.basicConfig()
+    
     all_modules = all_modules()
     
     parser = argparse.ArgumentParser(description="Process analysis pipeline jobs")
@@ -51,10 +53,12 @@ if __name__ == '__main__':
     
     if args.rebuild:
         mod_names = ', '.join([module.name for module in modules])
-        args.rebuild = raw_input("Rebuild modules: %s? " % mod_names) == 'y'
+        if raw_input("Rebuild modules: %s? (y/n) " % mod_names) != 'y':
+            print("  Nuts.")
+            sys.exit(-1)
 
     if args.bake and os.path.exists(config.synphys_db_sqlite):
-        msg = "sqlite database file %s already exists; ok to overwrite? " % config.synphys_db_sqlite
+        msg = "sqlite database file %s already exists; ok to overwrite? (y/n) " % config.synphys_db_sqlite
         ans = raw_input(msg)
         if ans == 'y':
             print("  Ok, you asked for it..")
@@ -66,10 +70,8 @@ if __name__ == '__main__':
     if args.rebuild:
         for module in modules:
             print("Dropping module %s" % module.name)
-            module.drop_all(reinitialize=False)
-        for module in modules:
-            print("Initializing module %s" % module.name)
-            module.initialize()
+            module.drop_all(reinitialize=True)
+        print("  done.")
 
     if args.drop:
         for module in modules:

@@ -151,3 +151,69 @@ class PulseStimAnalyzer(Analyzer):
         rec_delay = np.round(dt*np.diff(pulses).max(), 3)
         
         return ind_freq, rec_delay
+
+
+class PulseResponse(object):
+    """Represents a chunk of postsynaptic recording taken during a presynaptic pulse stimulus.
+
+    This class provides access to:
+    - presynaptic stimulus waveform and metadata
+    - presynaptic recording (if available)
+    - postsynaptic recording
+    - cell pair (if available)
+    - postsynaptic cell
+    """
+    def __init__(self, recording=None, stim_pulse=None, pair=None, start_time=None, ex_qc_pass=None, in_qc_pass=None, post_tseries=None):
+        self.recording = recording
+        self.stim_pulse = stim_pulse
+        self.pair = pair
+        self.start_time = start_time
+        self.ex_qc_pass = ex_qc_pass
+        self.in_qc_pass = in_qc_pass
+        self.post_tseries = post_tseries
+
+    @property
+    def pre_tseries(self):
+        return self.stim_pulse.recorded_tseries
+
+    @property
+    def stim_tseries(self):
+        return self.stim_pulse.stimulus_tseries
+    
+
+class StimPulse(object):
+    """Represents a single stimiulus pulse intended to evoke a synaptic response.
+
+    This class provides access to:
+    - presynaptic stimulus waveform and metadata
+    - presynaptic recording (if available)
+    - presynaptic cell
+    """
+    def __init__(self, recording=None, pulse_number=None, onset_time=None, next_pulse_time=None, amplitude=None, duration=None, 
+                 n_spikes=None, recorded_tseries=None):
+        self.recording = recording
+        self.pulse_number = pulse_number
+        self.onset_time = onset_time
+        self.next_pulse_time = next_pulse_time
+        self.amplitude = amplitude
+        self.duration = duration
+        self.n_spikes = n_spikes
+        self.recorded_tseries = recorded_tseries
+
+    @property
+    def recorded_tseries(self):
+        if self._rec_tseries is None:
+            self._rec_tseries = Trace(self.data, sample_rate=default_sample_rate, t0=self.data_start_time)
+        return self._rec_tseries
+
+    @property
+    def stimulus_tseries(self):
+        # can we work Stimulus objects into here, rather than generating manually??
+        if self._stim_tseries is None:
+            rec_ts = self.recorded_tseries  # todo: avoid loading full data for this step
+            data = np.zeros(shape=rec_ts.shape)
+            pstart = rec_ts.index_at(self.onset_time)
+            pstop = rec_ts.index_at(self.onset_time + self.duration)
+            data[pstart:pstop] = self.amplitude            
+            self._stim_tseries = rec_ts.copy(data=data)
+        return self._stim_tseries

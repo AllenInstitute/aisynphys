@@ -40,6 +40,9 @@ import sys, itertools
 # rtTA: tet-on   (activates TRE only in presence of doxycycline)
 # tTA2 : same behavior as tTA
 
+# hI56i (or hI56(1)) : human, intergenic region between dlx5 and dlx6, enhancer i  (i is pan-GABA; ii is not)
+#                      3xcore : minimal (bashed) core region of enhancer, repeated 3x
+
 EXPRESSION_FACTORS = ['cre', 'flp', 'dre', 'tTA']
 DRUGS = ['dox']
 
@@ -66,9 +69,23 @@ DRIVER_LINES = {                  # dependencies     products
     'Slc17a6-IRES2-FlpO':         [(['slc17a6'],      ['flp'])],
     'Slc17a8-iCre':               [(['slc17a8'],      ['cre'])],
     'Ctgf-T2A-dgCre':             [(['ctgf'],         ['cre'])],
+    'Ndnf-IRES2-dgCre':           [(['ndnf'],         ['cre'])],
+    'Slc32a1-IRES2-FlpO':         [(['slc32a1'],      ['flp'])],
     'Fam84b-FlpO':                [(['fam84b'],       ['flp'])],
-    'rAAV-mDlx-GFP':              [(['mDlx'],         ['GFP'])],
-    'rAAV-Dlx2.0-SYFP2':          [(['mDlx'],         ['YFP'])],
+    'rAAV-mDlx-GFP':              [(['mDlx'],         ['GFP'])],    
+    'rAAV-Dlx2.0-SYFP2':          [(['3xcorehI56i'],  ['YFP'])],  # pan-GABA
+    'rAAV-eHGT_078m-minBglobin-SYFP2-WPRE3-BGHpA': [
+                                   (['eHGT_078m'], ['YFP'])],  # pan-Glu
+    'rAAV-3xhI56icore-minBG-tdTomato-WPRE3-BGHpA': [
+                                   (['3xcorehI56i'],  ['tdTomato'])],  # pan-GABA
+    'rAAV-eHGT_073m-minBglobin-SYFP2-WPRE3-BGHpA': [
+                                   (['eHGT_073m'], ['YFP'])],  # pan-Glu
+    'rAAV-3xHGT_073m(core)-minBG-SYFP2-WPRE3-BGHpA': [
+                                   (['3xHGT_073m(core)'], ['YFP'])],  # pan-Glu
+    'rAAV-EF1a-fDIO-EGFP-WPRE-HGHpA': [
+                                   (['EF1a'], ['EGFP'])],
+    'rAAV-eHGT_078m-minBG-FlpO-WPRE-HGHpA': [
+                                   (['eHGT_078m'], ['flp'])],  # pan-Glu
 }
 
 
@@ -151,7 +168,7 @@ for rules in DRIVER_LINES.values():
         ALL_DRIVERS |= set([d for d in deps if d[0] != '~'])
 ALL_DRIVERS = ALL_DRIVERS - set(EXPRESSION_FACTORS) - set(DRUGS)
 
-ALL_REPORTERS = set()
+ALL_REPORTERS = set(FLUOROPHORES.keys())
 for rules in REPORTER_LINES.values():
     for deps, prods in rules:
         ALL_REPORTERS |= set(prods)
