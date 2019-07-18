@@ -121,7 +121,7 @@ class VImagingAnalyzer(QtGui.QSplitter):
             self.seqColors = [pg.intColor(i, nSeq*1.6) for i in range(nSeq)]
 
         # cull out truncated recordings :(
-        self.img_data = [[d['Time':0:200e-3] for d in row if d.xvals('Time')[-1] > 150e-3] for row in self.img_data]
+        self.img_data = [[d['Time':0:500e-3] for d in row if d.xvals('Time')[-1] > 150e-3] for row in self.img_data]
 
         # crop / concatenate
         img_len = min([min([d.shape[0] for d in row]) for row in self.img_data])
