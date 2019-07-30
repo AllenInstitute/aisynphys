@@ -130,7 +130,7 @@ class VImagingAnalyzer(QtGui.QSplitter):
         self.img_data = [[d[:img_len] for d in row] for row in self.img_data]
         self.img_arrays = [np.concatenate([d.asarray()[np.newaxis, ...] for d in row], axis=0) for row in self.img_data]
 
-        # average
+        # average (across trials???)
         self.img_mean = [img_arr.mean(axis=0) for img_arr in self.img_arrays]
 
         for p in self.clamp_plots:
@@ -240,7 +240,7 @@ class VImagingAnalyzer(QtGui.QSplitter):
 
         dff = ndimage.median_filter(test - base, 3) # original median radius was 10
         self.img2.setImage(dff) # mean across window, then mean across trials, then subtract
-        self.img2.setLookupTable(self.grw.getLookupTable(65535)) # set LUT to be the gradient in the lefft panel widget
+        self.img2.setLookupTable(self.grw.getLookupTable(65535)) # set LUT to be the gradient in the left panel widget
 
     def time_indices(self, time_vals):
         base_start, base_stop = self.base_time_rgn.getRegion()
