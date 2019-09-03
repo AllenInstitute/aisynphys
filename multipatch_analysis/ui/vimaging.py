@@ -326,6 +326,7 @@ class VImagingAnalyzer(QtGui.QSplitter):
 
         # Use the temporal profile in roi2 in order to remove changes in LED brightness over time
         # Then use the difference between baseline and test time regions to determine change in fluorescence
+        # DETREND OPTION: fit regression line to roi1, then assay to roi2....
         baseline1 = base_rgn1.mean(axis=1).mean(axis=1)
         signal1 = test_rgn1.mean(axis=1).mean(axis=1)
         baseline2 = base_rgn2.mean(axis=1).mean(axis=1)

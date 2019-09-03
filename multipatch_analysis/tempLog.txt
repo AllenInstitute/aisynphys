@@ -1,0 +1,85 @@
+LogEntry_0:
+    exception: None
+    currentDir: None
+    importance: 5
+    timestamp: '2019.07.17 21:03:43'
+    msgType: 'status'
+    message: 'Starting Manager configuration from c:\\users\\merlyn\\acq4\\config\\default.cfg'
+    id: 1
+LogEntry_1:
+    exception:
+        message: 'ImportError: DLL load failed: The specified module could not be found.'
+        traceback: ['  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\runpy.py", line 174, in _run_module_as_main\n    "__main__", fname, loader, pkg_name)\n', '  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\runpy.py", line 72, in _run_code\n    exec code in run_globals\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\__main__.py", line 58, in <module>\n    man = Manager(argv=sys.argv[1:])\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 153, in __init__\n    self.readConfig(configFile)\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 231, in readConfig\n    self.configure(cfg)\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 369, in configure\n    printExc("Error in ACQ4 configuration:")\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\util\\debug.py", line 43, in printExc\n    acq4.Manager.logExc(msg=msg, msgType=msgType)\n', '------- exception caught ---------->\n', 'Traceback (most recent call last):\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 276, in configure\n    __import__(mod)\n', '  File "c:\\users\\merlyn\\multipatch_analysis\\multipatch_analysis\\ui\\acq4_modules.py", line 26, in <module>\n    from . import dashboard\n', '  File "c:\\users\\merlyn\\multipatch_analysis\\multipatch_analysis\\ui\\dashboard.py", line 12, in <module>\n    from .. import database\n', '  File "c:\\users\\merlyn\\multipatch_analysis\\multipatch_analysis\\database\\__init__.py", line 1, in <module>\n    from .database import Session, aliased, or_, and_, default_session, get_default_session, reset_db, vacuum, dispose_engines, default_sample_rate, db_name, bake_sqlite, clone_database\n', '  File "c:\\users\\merlyn\\multipatch_analysis\\multipatch_analysis\\database\\database.py", line 313, in <module>\n    init_engines()\n', '  File "c:\\users\\merlyn\\multipatch_analysis\\multipatch_analysis\\database\\database.py", line 263, in init_engines\n    engine_ro = create_engine(db_address_ro, **opts_ro)\n', '  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\site-packages\\sqlalchemy\\engine\\__init__.py", line 431, in create_engine\n    return strategy.create(*args, **kwargs)\n', '  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\site-packages\\sqlalchemy\\engine\\strategies.py", line 87, in create\n    dbapi = dialect_cls.dbapi(**dbapi_args)\n', '  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\site-packages\\sqlalchemy\\dialects\\postgresql\\psycopg2.py", line 599, in dbapi\n    import psycopg2\n', '  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\site-packages\\psycopg2\\__init__.py", line 50, in <module>\n    from psycopg2._psycopg import BINARY, NUMBER, STRING, DATETIME, ROWID\n']
+    currentDir: None
+    importance: 5
+    timestamp: '2019.07.17 21:03:44'
+    traceback: ['  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\runpy.py", line 174, in _run_module_as_main\n    "__main__", fname, loader, pkg_name)\n', '  File "C:\\Users\\Merlyn\\Anaconda2\\envs\\mpatch\\lib\\runpy.py", line 72, in _run_code\n    exec code in run_globals\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\__main__.py", line 58, in <module>\n    man = Manager(argv=sys.argv[1:])\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 153, in __init__\n    self.readConfig(configFile)\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 231, in readConfig\n    self.configure(cfg)\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\Manager.py", line 369, in configure\n    printExc("Error in ACQ4 configuration:")\n', '  File "c:\\users\\merlyn\\acq4\\acq4\\util\\debug.py", line 43, in printExc\n    acq4.Manager.logExc(msg=msg, msgType=msgType)\n', '------- exception caught ---------->\n']
+    msgType: 'error'
+    message: 'Error in ACQ4 configuration:'
+    id: 2
+LogEntry_2:
+    exception: None
+    currentDir: None
+    importance: 5
+    timestamp: '2019.07.17 21:03:44'
+    msgType: 'status'
+    message: '=== Device configuration complete ==='
+    id: 3
+LogEntry_3:
+    exception: None
+    currentDir: None
+    importance: 5
+    timestamp: '2019.07.17 21:03:44'
+    msgType: 'status'
+    message: '=== Setting base directory: C:\\users\\Merlyn\\desktop\\GEVI ==='
+    id: 4
+LogEntry_4:
+    exception: None
+    currentDir: 'C:\\users\\Merlyn\\desktop\\GEVI'
+    importance: 8
+    timestamp: '2019.07.17 21:03:44'
+    msgType: 'warning'
+    docs: ['userGuide/dataManagement.html#notes-and-logs']
+    message: 'No log directory set. Log messages will not be stored.'
+    id: 5
+LogEntry_5:
+    exception: None
+    currentDir: 'C:\\users\\Merlyn\\desktop\\GEVI'
+    importance: 5
+    timestamp: '2019.07.17 21:03:44'
+    msgType: 'status'
+    message: 'Manager configuration complete.'
+    id: 6
+LogEntry_6:
+    exception: None
+    currentDir: 'C:\\users\\Merlyn\\desktop\\GEVI'
+    importance: 9
+    timestamp: '2019.07.17 21:03:44'
+    msgType: 'status'
+    message: u'ACQ4 version 0.9.3+g87bade3c started.'
+    id: 7
+LogEntry_7:
+    exception: None
+    currentDir: 'C:\\users\\Merlyn\\desktop\\GEVI'
+    importance: 5
+    timestamp: '2019.07.17 21:04:00'
+    msgType: 'status'
+    message: 'Reloaded all libraries under acq4.'
+    id: 8
+LogEntry_8:
+    exception: None
+    currentDir: 'C:\\users\\Merlyn\\desktop\\GEVI'
+    importance: 8
+    timestamp: '2019.07.17 21:04:13'
+    msgType: 'warning'
+    docs: ['userGuide/dataManagement.html#notes-and-logs']
+    message: 'No log directory set. Log messages will not be stored.'
+    id: 9
+LogEntry_9:
+    exception: None
+    currentDir: 'C:\\users\\Merlyn\\desktop\\GEVI'
+    importance: 9
+    timestamp: '2019.07.17 21:04:19'
+    msgType: 'status'
+    message: 'Shutting Down.'
+    id: 10
