@@ -6,6 +6,4 @@ config.yml
 cache
 *.egg-info
 .ipynb_checkpoints
-multipatch_analysis/templog.txt
-templog.txt
 
