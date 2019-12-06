@@ -324,6 +324,8 @@ class VImagingAnalyzer(QtGui.QSplitter):
         test_rgn1 = roi1.getArrayRegion(test_mean, self.img1, axes=(1, 2))
         test_rgn2 = roi2.getArrayRegion(test_mean, self.img1, axes=(1, 2))
 
+        # Use the temporal profile in roi2 in order to remove changes in LED brightness over time
+        # Then use the difference between baseline and test time regions to determine change in fluorescence
         baseline1 = base_rgn1.mean(axis=1).mean(axis=1)
         signal1 = test_rgn1.mean(axis=1).mean(axis=1)
         baseline2 = base_rgn2.mean(axis=1).mean(axis=1)

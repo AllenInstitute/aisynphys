@@ -6,4 +6,3 @@ config.yml
 cache
 *.egg-info
 .ipynb_checkpoints
-
