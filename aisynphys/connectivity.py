@@ -659,7 +659,6 @@ class CorrectionModel(ConnectivityModel):
             fit.cp_ci = (est_pmax, lower, upper)
         else: # MINOS
             # do minuit calculation
-            fit.minuit.errordef = 1.0 # because we are using a proper likelihood function.
             try:
                 fit.minuit.minos(cl=0.95)
             except Exception as e:
