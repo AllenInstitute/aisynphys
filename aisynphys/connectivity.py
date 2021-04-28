@@ -604,8 +604,11 @@ class CorrectionModel(ConnectivityModel):
         self.correction_parameters = correction_parameters # list of list of parameters for correction functions
         self.do_minos = do_minos
 
-    def dist_gaussian(self, p_sigma, v_dist):
+
+    @staticmethod
+    def dist_gaussian(p_sigma, v_dist):
         return (np.exp(-1.0 * v_dist ** 2 / (2.0 * p_sigma ** 2)))
+
 
     def connection_probability(self, x):
         # x is expected to be [distance, correction_var1, correction_var2,...].
@@ -643,7 +646,45 @@ class CorrectionModel(ConnectivityModel):
         cp = fit.x
         import pdb
         
-        if not inst.do_minos: # Approximation method
+        if inst.do_minos: # MINOS (Likelihood-based CI estimation)
+            # do minuit calculation
+            
+            # special case for probability 0
+            # because lower-end is not available, upper end should use different level of confidence
+            # cl = 0.975 if conn.sum() == 0 else 0.95
+            cl = 0.95
+
+            try:
+                fit.minuit.minos(cl=cl)
+            except RuntimeError as e: # Catch RuntimeError from iminuit
+                if conn.sum() == 0:
+                    # zero connection case. special treatment
+                    fit.x = 0
+                    lower, upper = manual_ci_search(fit, cl, zero_connection=True)
+                    fit.cp_ci = (cp, lower, upper)
+                    pdb.set_trace()
+                    return fit
+                else:
+                    lower, upper = manual_ci_search(fit, cl)
+                    fit.cp_ci = (cp, lower, upper)
+                    print(e)
+                    return fit
+            except Exception as e:
+                # re-raise if unexpected exception is observed
+                print(e)
+                raise e
+
+            cp = fit.minuit.params['x0'].value
+            lower = cp  + fit.minuit.merrors['x0'].lower
+            upper = cp  + fit.minuit.merrors['x0'].upper
+            if fit.minuit.merrors['x0'].is_valid == False:
+                # do it once more (sometimes helps)
+                fit.minuit.minos(cl=cl)
+                if fit.minuit.merrors['x0'].is_valid == False:
+                    # it it doesn't work, manually search the value
+                    lower, upper = manual_ci_search(fit, cl)
+
+        else: # Approximation method
             inst.pmax = 1.0
             mean_adjustment = inst.connection_probability(x).mean()
             # to calculate CI, get the adjustment values from the instance.
@@ -657,40 +698,46 @@ class CorrectionModel(ConnectivityModel):
             lower = lower / mean_adjustment
             upper = upper / mean_adjustment
             fit.cp_ci = (est_pmax, lower, upper)
-        else: # MINOS
-            # do minuit calculation
-            try:
-                fit.minuit.minos(cl=0.95)
-            except Exception as e:
-                print(e)
-                pdb.set_trace()
-
-            cp = fit.minuit.params['x0'].value
-            lower = cp  + fit.minuit.merrors['x0'].lower
-            upper = cp  + fit.minuit.merrors['x0'].upper
-            if fit.minuit.merrors['x0'].is_valid == False:
-                # do it once more (sometimes helps)
-                fit.minuit.minos(cl=0.95)
-                if fit.minuit.merrors['x0'].is_valid == False:
-                    # print('not valid, fall back to manual ci search')
-                    # manually search the value
-                    lower, upper = manual_ci_search(fit)
 
         fit.cp_ci = (cp, lower, upper)
 
         return fit
 
-def manual_ci_search(fit):
-    # find the CI by looking at the likelihood function
-    # for CL = 0.95, we look for x with likelihood function minimum value + 
-    from scipy.stats import chi2
-    factor = chi2(1).ppf(0.95)
-    fit.x
-    fitfun = lambda x: (fit.minuit.fcn([x]) - fit.minuit.fcn([fit.x]) - factor)**2
-    lower = iminuit.minimize(fitfun, fit.x * 0.9, bounds=[[0, fit.x]])
-    upper = iminuit.minimize(fitfun, fit.x * 1.1, bounds=[[fit.x, 5]])
+def manual_ci_search(fit, cl, zero_connection=False):
+    """Return confidence intervals on the probability of connectivity, given the
+    failed execution of the minuit fit.
     
-    return (lower.x, upper.x)
+    Currently this simply calls `statsmodels.stats.proportion.proportion_confint`
+    using the "beta" method.
+    
+    Parameters
+    ----------
+    fit : Minuit
+        Result of the fit returned by iminuit
+    cl : float
+        Confidence level for the CI estimate
+    zero_connection : bool
+        If true, set return 0 as the lower CI bound, and only evaluate the upper CI bound
+        
+    Returns
+    -------
+    lower : float
+        The lower confidence interval
+    upper : float
+        The upper confidence interval
+    """
+    from scipy.stats import chi2
+    factor = chi2(1).ppf(cl)
+    fitfun = lambda x: (fit.minuit.fcn([x]) - fit.minuit.fcn([fit.x]) - factor * fit.minuit.errordef)**2
+    if zero_connection:
+        lower = 0.0
+        upper = iminuit.minimize(fitfun, 0.001, bounds=[[fit.x, 5]])
+        return (lower, upper.x)
+    else:
+        lower = iminuit.minimize(fitfun, fit.x * 0.9, bounds=[[0, fit.x]])
+        upper = iminuit.minimize(fitfun, fit.x * 1.1, bounds=[[fit.x, 5]])
+        return (lower.x, upper.x)
+    
 
 
 class ErfModel(ConnectivityModel):
