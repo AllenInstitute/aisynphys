@@ -572,6 +572,7 @@ class GaussianModel(ConnectivityModel):
     def correction_func(params, x):
         return np.exp(-x**2 / (2 * params[1]**2))
 
+
 class CorrectionModel(ConnectivityModel):
     """ Connectivity model with corrections for potential biases
 
@@ -593,16 +594,15 @@ class CorrectionModel(ConnectivityModel):
     do_minos : bool
         Use MINOS algorithm for estimating the 95% confidence interval (default: True).
         If False, it uses the same approximation method used for the distance adjustment.
-        
+
     Note: correction_variables, correction_parameters, and correction_functions should have the same lengths.
     """
     def __init__(self, pmax, correction_variables, correction_functions, correction_parameters, do_minos=True):
         self.pmax = pmax
-        self.correction_variables = correction_variables # list of strings (names of correction variables)
-        self.correction_functions = correction_functions # list of functions
-        self.correction_parameters = correction_parameters # list of list of parameters for correction functions
+        self.correction_variables = correction_variables  # list of strings (names of correction variables)
+        self.correction_functions = correction_functions  # list of functions
+        self.correction_parameters = correction_parameters  # list of list of parameters for correction functions
         self.do_minos = do_minos
-
 
     def connection_probability(self, x):
         # x is expected to be [distance, correction_var1, correction_var2,...].
@@ -615,21 +615,19 @@ class CorrectionModel(ConnectivityModel):
             correction *= np.nan_to_num(corrval, nan=1.0)
         return np.clip(self.pmax * correction, 0.0, 1.0)
 
-
     def nll(self, pmax, x, conn):
-        self.pmax = pmax # override existing value
+        self.pmax = pmax  # override existing value
         return -self.likelihood(x, conn)
 
-
     def fit(self, x, conn, init=(0.1), bounds=((0.0, 3.0)), excinh=None, **kwds):
-        self.excinh = excinh # setting the cell class...
+        self.excinh = excinh  # setting the cell class...
         fit = iminuit.minimize(
-                        self.nll,
-                        x0=init, 
-                        args=(x, conn),
-                        bounds=bounds,
-                        **kwds,
-                    )
+            self.nll,
+            x0=init,
+            args=(x, conn),
+            bounds=bounds,
+            **kwds,
+        )
 
         if len(conn) == 0:
             fit.cp_ci = (np.nan, np.nan, np.nan)
@@ -637,14 +635,14 @@ class CorrectionModel(ConnectivityModel):
 
         cp = fit.x
         import pdb
-        
-        if self.do_minos: # MINOS (Likelihood-based CI estimation)
+
+        if self.do_minos:  # MINOS (Likelihood-based CI estimation)
             # do minuit calculation
             cl = 0.95
 
             try:
                 fit.minuit.minos(cl=cl)
-            except RuntimeError as e: # Catch RuntimeError from iminuit
+            except RuntimeError as e:  # Catch RuntimeError from iminuit
                 if conn.sum() == 0:
                     # zero connection case. special treatment
                     fit.x = 0
@@ -663,23 +661,23 @@ class CorrectionModel(ConnectivityModel):
                 raise e
 
             cp = fit.minuit.params['x0'].value
-            lower = cp  + fit.minuit.merrors['x0'].lower
-            upper = cp  + fit.minuit.merrors['x0'].upper
-            if fit.minuit.merrors['x0'].is_valid == False:
+            lower = cp + fit.minuit.merrors['x0'].lower
+            upper = cp + fit.minuit.merrors['x0'].upper
+            if not fit.minuit.merrors['x0'].is_valid:
                 # do it once more (sometimes helps)
                 fit.minuit.minos(cl=cl)
-                if fit.minuit.merrors['x0'].is_valid == False:
+                if not fit.minuit.merrors['x0'].is_valid:
                     # it it doesn't work, manually search the value
                     lower, upper = manual_ci_search(fit, cl)
 
-        else: # Approximation method
+        else:  # Approximation method
             self.pmax = 1.0
             mean_adjustment = self.connection_probability(x).mean()
             # to calculate CI, get the adjustment values from the instance.
             n_conn = conn.sum()
             n_test = len(conn)
             est_pmax = (n_conn / n_test) / mean_adjustment
-        
+
             # and for the CI, we can just use a standard binomial confidence interval scaled by the same factor
             lower, upper = connection_probability_ci(n_conn, n_test)
 
@@ -695,10 +693,10 @@ class CorrectionModel(ConnectivityModel):
 def manual_ci_search(fit, cl, zero_connection=False):
     """Return confidence intervals on the probability of connectivity, given the
     failed execution of the minuit fit.
-    
+
     Currently this simply calls `statsmodels.stats.proportion.proportion_confint`
     using the "beta" method.
-    
+
     Parameters
     ----------
     fit : Minuit
@@ -707,7 +705,7 @@ def manual_ci_search(fit, cl, zero_connection=False):
         Confidence level for the CI estimate
     zero_connection : bool
         If true, set return 0 as the lower CI bound, and only evaluate the upper CI bound
-        
+
     Returns
     -------
     lower : float
@@ -717,7 +715,10 @@ def manual_ci_search(fit, cl, zero_connection=False):
     """
     from scipy.stats import chi2
     factor = chi2(1).ppf(cl)
-    fitfun = lambda x: (fit.minuit.fcn([x]) - fit.minuit.fcn([fit.x]) - factor * fit.minuit.errordef)**2
+
+    def fitfun(x):
+        return (fit.minuit.fcn([x]) - fit.minuit.fcn([fit.x]) - factor * fit.minuit.errordef)**2
+
     if zero_connection:
         lower = 0.0
         upper = iminuit.minimize(fitfun, 0.001, bounds=[[fit.x, 5]])
@@ -726,7 +727,6 @@ def manual_ci_search(fit, cl, zero_connection=False):
         lower = iminuit.minimize(fitfun, fit.x * 0.9, bounds=[[0, fit.x]])
         upper = iminuit.minimize(fitfun, fit.x * 1.1, bounds=[[fit.x, 5]])
         return (lower.x, upper.x)
-    
 
 
 class ErfModel(ConnectivityModel):
@@ -753,7 +753,7 @@ class ErfModel(ConnectivityModel):
         self.pmax = pmax
         self.size = size
         self.midpoint = midpoint
-    
+
     def connection_probability(self, x):
         return self.pmax * 0.5 * (1.0 + erf((x - self.midpoint) / (np.sqrt(2) * self.size)))
 
@@ -764,7 +764,7 @@ class ErfModel(ConnectivityModel):
     @classmethod
     def fit(cls, x, conn, init, bounds, constraint=None, fixed_size=False, fixed_max=False):
         # constraint should be a 2-element tuple with (sigma_multiplier, stop_point)
-        if constraint == None:
+        if constraint is None:
             fit = iminuit.minimize(
                 cls.err_fn,
                 x0=init,
@@ -776,7 +776,7 @@ class ErfModel(ConnectivityModel):
             # to make it quartile of the detection power, use the following parameters
             # constraint[0] == 0.6745 (specify quartile point using sigma)
             # constraint[1] == 4.5655 observed value in the data (may change if the data change)
-            con_array = np.array([[0, constraint[0], 1]]) # 1 x 3 matrix
+            con_array = np.array([[0, constraint[0], 1]])  # 1 x 3 matrix
             constraints = scipy.optimize.LinearConstraint(con_array, lb=-np.inf, ub=constraint[1])
             fit = scipy.optimize.minimize(
                 cls.err_fn,
@@ -807,7 +807,7 @@ class BinaryModel(ConnectivityModel):
         self.pmax = pmax
         self.size = size
         self.adjustment = adjustment
-    
+
     def connection_probability(self, x):
         val = np.ones_like(x)
         val[x < self.size] *= self.adjustment
