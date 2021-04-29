@@ -568,17 +568,17 @@ class GaussianModel(ConnectivityModel):
     def connection_probability(self, x):
         return self.pmax * np.exp(-x**2 / (2 * self.size**2))
 
+    @staticmethod
+    def correction_func(params, x):
+        return np.exp(-x**2 / (2 * params[1]**2))
 
 class CorrectionModel(ConnectivityModel):
     """ Connectivity model with corrections for potential biases
-    Gaussian is used for distance-adjustment.
 
     Parameters
     ----------
     pmax : float
         Maximum connection probability (at 0 intersomatic distance)
-    size : float
-        Gaussian sigma for distance-adjustment
     correction_variables : list of strings
         Names of correction variables.
         These names should be defined in each Pair in pair_groups when measure_connectivity is called.
@@ -596,31 +596,24 @@ class CorrectionModel(ConnectivityModel):
         
     Note: correction_variables, correction_parameters, and correction_functions should have the same lengths.
     """
-    def __init__(self, pmax, size, correction_variables, correction_functions, correction_parameters, do_minos=True):
+    def __init__(self, pmax, correction_variables, correction_functions, correction_parameters, do_minos=True):
         self.pmax = pmax
-        self.size = size
         self.correction_variables = correction_variables # list of strings (names of correction variables)
         self.correction_functions = correction_functions # list of functions
         self.correction_parameters = correction_parameters # list of list of parameters for correction functions
         self.do_minos = do_minos
 
 
-    @staticmethod
-    def dist_gaussian(p_sigma, v_dist):
-        return (np.exp(-1.0 * v_dist ** 2 / (2.0 * p_sigma ** 2)))
-
-
     def connection_probability(self, x):
         # x is expected to be [distance, correction_var1, correction_var2,...].
         # the final probability is modeled as a product of multiple corrections.
-        distancepart = self.dist_gaussian(self.size, x[0])
         correction = 1.0
-        for i in range(1, len(x)):
+        for i in range(len(x)):
             # replace None with nan to make the following code to work
-            v = [np.nan if el is None else el for el in x[i]]
-            corrval = self.correction_functions[i-1](self.correction_parameters[self.excinh][i-1], v)
+            v = np.array([np.nan if el is None else el for el in x[i]])
+            corrval = self.correction_functions[i](self.correction_parameters[self.excinh][i], v)
             correction *= np.nan_to_num(corrval, nan=1.0)
-        return np.clip(self.pmax * distancepart * correction, 0.0, 1.0)
+        return np.clip(self.pmax * correction, 0.0, 1.0)
 
 
     @classmethod
@@ -766,7 +759,7 @@ class ErfModel(ConnectivityModel):
         self.midpoint = midpoint
     
     def connection_probability(self, x):
-        return self.pmax / 2.0 * (1.0 + erf((x - self.midpoint) / (np.sqrt(2) * self.size)))
+        return self.pmax * 0.5 * (1.0 + erf((x - self.midpoint) / (np.sqrt(2) * self.size)))
 
     @staticmethod
     def correction_func(params, x):
@@ -1010,6 +1003,6 @@ def ei_correct_connectivity(ei_classes, correction_metrics, pairs):
     
     correction_parameters = [[fit.fit_result.x for fit in fits] for fits in correction_fits.values()]
     correction_functions = [metric['model'].correction_func for metric in correction_metrics.values()]
-    corr_model = CorrectionModel(0.1, 100e-6, correction_metrics.keys(), correction_functions, correction_parameters)
+    corr_model = CorrectionModel(0.1, correction_metrics.keys(), correction_functions, correction_parameters)
     
     return corr_model
