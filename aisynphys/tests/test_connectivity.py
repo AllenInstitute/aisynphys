@@ -68,7 +68,8 @@ def test_correction_model():
     
     assert corr_model.pmax == 0.1
 
-    fit = CorrectionModel.fit(corr_model, variables, conn, excinh=1)
+    #fit = CorrectionModel.fit(corr_model, variables, conn, excinh=1)
+    fit = corr_model.fit(variables, conn, excinh=1)
     assert corr_model.pmax == pytest.approx(0.74590, 1e-4)
     assert fit.x == pytest.approx(0.74590, 1e-4)
     assert corr_model.likelihood(variables, conn) == pytest.approx(-1.95075, 1e-4)

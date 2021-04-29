@@ -616,18 +616,17 @@ class CorrectionModel(ConnectivityModel):
         return np.clip(self.pmax * correction, 0.0, 1.0)
 
 
-    @classmethod
-    def nll(cls, pmax, inst, x, conn):
-        inst.pmax = pmax # override existing value
-        return -inst.likelihood(x, conn)
+    def nll(self, pmax, x, conn):
+        self.pmax = pmax # override existing value
+        return -self.likelihood(x, conn)
 
-    @classmethod
-    def fit(cls, inst, x, conn, init=(0.1), bounds=((0.0, 3.0)), excinh=None, **kwds):
-        inst.excinh = excinh # setting the cell class...
+
+    def fit(self, x, conn, init=(0.1), bounds=((0.0, 3.0)), excinh=None, **kwds):
+        self.excinh = excinh # setting the cell class...
         fit = iminuit.minimize(
-                        cls.nll,
+                        self.nll,
                         x0=init, 
-                        args=(inst, x, conn),
+                        args=(x, conn),
                         bounds=bounds,
                         **kwds,
                     )
@@ -639,12 +638,8 @@ class CorrectionModel(ConnectivityModel):
         cp = fit.x
         import pdb
         
-        if inst.do_minos: # MINOS (Likelihood-based CI estimation)
+        if self.do_minos: # MINOS (Likelihood-based CI estimation)
             # do minuit calculation
-            
-            # special case for probability 0
-            # because lower-end is not available, upper end should use different level of confidence
-            # cl = 0.975 if conn.sum() == 0 else 0.95
             cl = 0.95
 
             try:
@@ -678,8 +673,8 @@ class CorrectionModel(ConnectivityModel):
                     lower, upper = manual_ci_search(fit, cl)
 
         else: # Approximation method
-            inst.pmax = 1.0
-            mean_adjustment = inst.connection_probability(x).mean()
+            self.pmax = 1.0
+            mean_adjustment = self.connection_probability(x).mean()
             # to calculate CI, get the adjustment values from the instance.
             n_conn = conn.sum()
             n_test = len(conn)
@@ -695,6 +690,7 @@ class CorrectionModel(ConnectivityModel):
         fit.cp_ci = (cp, lower, upper)
 
         return fit
+
 
 def manual_ci_search(fit, cl, zero_connection=False):
     """Return confidence intervals on the probability of connectivity, given the
