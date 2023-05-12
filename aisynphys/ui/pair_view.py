@@ -1,6 +1,6 @@
 import numpy as np
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 from collections import OrderedDict
 from neuroanalysis.ui.plot_grid import PlotGrid
 from neuroanalysis.ui.filter import SignalFilter, ArtifactRemover
@@ -13,7 +13,7 @@ from neuroanalysis.baseline import float_mode
 from neuroanalysis.stats import ragged_mean
 
 
-class PairView(QtGui.QWidget):
+class PairView(QtWidgets.QWidget):
     """For analyzing pre/post-synaptic pairs.
     """
     def __init__(self, parent=None):
@@ -23,13 +23,13 @@ class PairView(QtGui.QWidget):
         self.current_event_set = None
         self.event_sets = []
 
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
 
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.vsplit = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.vsplit = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.layout.addWidget(self.vsplit, 0, 0)
         
         self.pre_plot = pg.PlotWidget()
@@ -45,31 +45,31 @@ class PairView(QtGui.QWidget):
         self.response_plots = PlotGrid()
         self.vsplit.addWidget(self.response_plots)
 
-        self.event_splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        self.event_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.vsplit.addWidget(self.event_splitter)
         
         self.event_table = pg.TableWidget()
         self.event_splitter.addWidget(self.event_table)
         
-        self.event_widget = QtGui.QWidget()
-        self.event_widget_layout = QtGui.QGridLayout()
+        self.event_widget = QtWidgets.QWidget()
+        self.event_widget_layout = QtWidgets.QGridLayout()
         self.event_widget.setLayout(self.event_widget_layout)
         self.event_splitter.addWidget(self.event_widget)
         
         self.event_splitter.setSizes([600, 100])
         
-        self.event_set_list = QtGui.QListWidget()
+        self.event_set_list = QtWidgets.QListWidget()
         self.event_widget_layout.addWidget(self.event_set_list, 0, 0, 1, 2)
         self.event_set_list.addItem("current")
         self.event_set_list.itemSelectionChanged.connect(self.event_set_selected)
         
-        self.add_set_btn = QtGui.QPushButton('add')
+        self.add_set_btn = QtWidgets.QPushButton('add')
         self.event_widget_layout.addWidget(self.add_set_btn, 1, 0, 1, 1)
         self.add_set_btn.clicked.connect(self.add_set_clicked)
-        self.remove_set_btn = QtGui.QPushButton('del')
+        self.remove_set_btn = QtWidgets.QPushButton('del')
         self.event_widget_layout.addWidget(self.remove_set_btn, 1, 1, 1, 1)
         self.remove_set_btn.clicked.connect(self.remove_set_clicked)
-        self.fit_btn = QtGui.QPushButton('fit all')
+        self.fit_btn = QtWidgets.QPushButton('fit all')
         self.event_widget_layout.addWidget(self.fit_btn, 2, 0, 1, 2)
         self.fit_btn.clicked.connect(self.fit_clicked)
 
@@ -290,7 +290,7 @@ class PairView(QtGui.QWidget):
             return
         ces = self.current_event_set
         self.event_sets.append(ces)
-        item = QtGui.QListWidgetItem("%d -> %d" % (ces[0], ces[1]))
+        item = QtWidgets.QListWidgetItem("%d -> %d" % (ces[0], ces[1]))
         self.event_set_list.addItem(item)
         item.event_set = ces
         

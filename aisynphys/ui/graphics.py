@@ -6,7 +6,7 @@ from neuroanalysis.ui.plot_grid import PlotGrid
 from ..connectivity import connectivity_profile
 
 
-class MatrixItem(pg.QtGui.QGraphicsItemGroup):
+class MatrixItem(pg.QtWidgets.QGraphicsItemGroup):
     """GraphicsItem displaying a table with column / row labels and text in
     each cell.
     
@@ -37,7 +37,7 @@ class MatrixItem(pg.QtGui.QGraphicsItemGroup):
         sigClicked = pg.QtCore.Signal(object, object, object, object) # self, event, row, col
 
     def __init__(self, text, fgcolor, bgcolor, rows, cols, size=50, border_color='k', header_color='w'):
-        pg.QtGui.QGraphicsItemGroup.__init__(self)
+        pg.QtWidgets.QGraphicsItemGroup.__init__(self)
         self._signalHandler = MatrixItem.SignalHandler()
         self.sigClicked = self._signalHandler.sigClicked
         self.cell_size = size
@@ -66,7 +66,7 @@ class MatrixItem(pg.QtGui.QGraphicsItemGroup):
                 rect.sigClicked.connect(self.element_clicked)
                 self.cells[-1].append(rect)
 
-                txt = pg.QtGui.QGraphicsTextItem(text[i][j], parent=self)
+                txt = pg.QtWidgets.QGraphicsTextItem(text[i][j], parent=self)
                 br = txt.boundingRect()
                 txt.setTextWidth(br.width())
                 txt.setPos(x + size/2 - br.center().x(), y + size/2 - br.center().y())
@@ -81,7 +81,7 @@ class MatrixItem(pg.QtGui.QGraphicsItemGroup):
         font_size = size / 2
         for i in ('Presynaptic', 'Postsynaptic'):
             html = '<span style="font-size: %dpx; font-weight: bold">%s</span>' % (font_size, i)
-            item = pg.QtGui.QGraphicsTextItem("", parent=self)
+            item = pg.QtWidgets.QGraphicsTextItem("", parent=self)
             item.setHtml(html)
             if i == 'Presynaptic':
                 item.rotate(-90)
@@ -133,7 +133,7 @@ class MatrixItem(pg.QtGui.QGraphicsItemGroup):
                 html += '<br>'
             html += '<span style="font-size: %dpx;">%s</span>' % (fs, line)
         html += '</div>'
-        item = pg.QtGui.QGraphicsTextItem("", parent=self)
+        item = pg.QtWidgets.QGraphicsTextItem("", parent=self)
         item.setHtml(html)
         item.setTextWidth(item.boundingRect().width())
 
@@ -169,7 +169,7 @@ class MatrixItem(pg.QtGui.QGraphicsItemGroup):
             path.lineTo(w/2, -width-h*0.5)
             path.lineTo(0, -width)
             path.closeSubpath()
-            item = pg.QtGui.QGraphicsPathItem(self)
+            item = pg.QtWidgets.QGraphicsPathItem(self)
             item.setPath(path)
             item.setBrush(pg.mkBrush(0.8))
             item.setPen(pg.mkPen(color='k', width=1))
@@ -191,7 +191,7 @@ class MatrixItem(pg.QtGui.QGraphicsItemGroup):
         return self._bounding_rect
 
 
-class MatrixElementItem(pg.QtGui.QGraphicsRectItem):
+class MatrixElementItem(pg.QtWidgets.QGraphicsRectItem):
     class SignalHandler(pg.QtCore.QObject):
         """Because we can't subclass from both QObject and QGraphicsRectItem at the same time
         """
@@ -200,7 +200,7 @@ class MatrixElementItem(pg.QtGui.QGraphicsRectItem):
     def __init__(self, size, parent):
         self._signalHandler = MatrixElementItem.SignalHandler()
         self.sigClicked = self._signalHandler.sigClicked
-        pg.QtGui.QGraphicsRectItem.__init__(self, 0, 0, size, size, parent=parent)
+        pg.QtWidgets.QGraphicsRectItem.__init__(self, 0, 0, size, size, parent=parent)
 
     def mouseClickEvent(self, event):
         self.sigClicked.emit(self, event)    

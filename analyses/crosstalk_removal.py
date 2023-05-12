@@ -135,8 +135,8 @@ class CrosstalkAnalyzer(object):
         self.plt3.setXLink(self.plt1)
 
     def show(self):
-        self.win = pg.QtGui.QSplitter(pg.QtCore.Qt.Horizontal)
-        self.vsplit = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+        self.win = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Horizontal)
+        self.vsplit = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
         self.win.addWidget(self.vsplit)
         self.vsplit.addWidget(self.expt_browser)
         self.vsplit.addWidget(self.ptree)

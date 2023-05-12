@@ -6,27 +6,27 @@ from datetime import datetime
 
 import acq4.util.Canvas, acq4.util.DataManager
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 
 from .. import metadata_submission, config
 from . import ui
 
 
-class ExperimentSubmitUi(QtGui.QWidget):
+class ExperimentSubmitUi(QtWidgets.QWidget):
     def __init__(self):
         self.path = None
         
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.setWindowTitle("Experiment metadata QC")
         
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         
-        self.hsplit = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        self.hsplit = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.layout.addWidget(self.hsplit, 0, 0)
 
-        self.left_panel = QtGui.QWidget()
-        self.left_layout = QtGui.QVBoxLayout()
+        self.left_panel = QtWidgets.QWidget()
+        self.left_layout = QtWidgets.QVBoxLayout()
         self.left_layout.setContentsMargins(0, 0, 0, 0)
         self.left_panel.setLayout(self.left_layout)
         self.hsplit.addWidget(self.left_panel)
@@ -36,23 +36,23 @@ class ExperimentSubmitUi(QtGui.QWidget):
         self.file_tree.itemDoubleClicked.connect(self.load_clicked)
         self.left_layout.addWidget(self.file_tree)
         
-        self.ctrl_widget = QtGui.QWidget()
-        self.ctrl_layout = QtGui.QGridLayout()
+        self.ctrl_widget = QtWidgets.QWidget()
+        self.ctrl_layout = QtWidgets.QGridLayout()
         self.ctrl_widget.setLayout(self.ctrl_layout)
         self.ctrl_layout.setContentsMargins(0, 0, 0, 0)
         self.left_layout.addWidget(self.ctrl_widget)
         
         row = self.ctrl_layout.rowCount()
-        self.load_btn = QtGui.QPushButton('load files')
+        self.load_btn = QtWidgets.QPushButton('load files')
         self.load_btn.clicked.connect(self.load_clicked)
         self.ctrl_layout.addWidget(self.load_btn, row, 0)
         
-        self.submit_btn = QtGui.QPushButton('submit...')
+        self.submit_btn = QtWidgets.QPushButton('submit...')
         self.submit_btn.clicked.connect(self.submit_clicked)
         self.submit_btn.setEnabled(False)
         self.ctrl_layout.addWidget(self.submit_btn, row, 1)
 
-        self.vsplit = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.vsplit = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.hsplit.addWidget(self.vsplit)
         self.hsplit.setSizes([600, 700])
         
@@ -198,14 +198,14 @@ class FileTreeWidget(pg.TreeWidget):
             #pg.TreeWidget.mouseReleaseEvent(self, ev)
 
 
-#class StyleDelegate(QtGui.QStyledItemDelegate):
+#class StyleDelegate(QtWidgets.QStyledItemDelegate):
     #def __init__(self, table):
-        #QtGui.QStyledItemDelegate.__init__(self)
+        #QtWidgets.QStyledItemDelegate.__init__(self)
         #self.table = table
     
     #def paint(self, painter, option, index):
         ##print(index.row(), index.column())
-        #QtGui.QStyledItemDelegate.paint(self, painter, option, index)
+        #QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
 
 
 class ExperimentTreeItem(pg.TreeWidgetItem):
@@ -282,7 +282,7 @@ class TypeSelectItem(pg.TreeWidgetItem):
         self.types = types
         pg.TreeWidgetItem.__init__(self, [fh.shortName(), '', ''])
 
-        self.menu = QtGui.QMenu()
+        self.menu = QtWidgets.QMenu()
         for typ in self.types:
             act = self.menu.addAction(typ, self._type_selected)
         
@@ -368,15 +368,15 @@ class ImageTreeItem(TypeSelectItem):
         self.setBackground(2, pg.mkColor(color))
             
 
-class SubmitWindow(QtGui.QWidget):
+class SubmitWindow(QtWidgets.QWidget):
     def __init__(self):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.resize(800, 800)
         
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         
-        self.message_text = QtGui.QTextBrowser()
+        self.message_text = QtWidgets.QTextBrowser()
         self.message_text.setOpenExternalLinks(True)
         self.layout.addWidget(self.message_text, 0, 0)
         
@@ -384,7 +384,7 @@ class SubmitWindow(QtGui.QWidget):
         self.info_tree.setColumnHidden(1, True)
         self.layout.addWidget(self.info_tree, 0, 1)
         
-        self.submit_btn = QtGui.QPushButton('submit!')
+        self.submit_btn = QtWidgets.QPushButton('submit!')
         self.submit_btn.clicked.connect(self.submit)
         self.layout.addWidget(self.submit_btn, 1, 1)
         

@@ -12,12 +12,12 @@ from ..ui.actions import PairActions
 from aisynphys.ui.ScatterPlotWidget import ScatterPlotWidget
 
 
-class ScatterPlotTab(pg.QtGui.QWidget):
+class ScatterPlotTab(pg.QtWidgets.QWidget):
     def __init__(self):
-        pg.QtGui.QWidget.__init__(self)
-        self.layout = pg.QtGui.QGridLayout()
+        pg.QtWidgets.QWidget.__init__(self)
+        self.layout = pg.QtWidgets.QGridLayout()
         self.setLayout(self.layout)
-        self.v_splitter = pg.QtGui.QSplitter()
+        self.v_splitter = pg.QtWidgets.QSplitter()
         self.v_splitter.setOrientation(pg.QtCore.Qt.Vertical)
         self.layout.addWidget(self.v_splitter)
         self.element_scatter = ElementScatterPlot()
@@ -56,7 +56,7 @@ class ElementScatterPlot(ScatterPlots):
     def __init__(self):
         ScatterPlots.__init__(self)
     
-        header = pg.QtGui.QLabel()
+        header = pg.QtWidgets.QLabel()
         header.setText('<span style="font-weight: bold">Element-wise Scatter Plot</span>')
         self.ctrlPanel.insertWidget(0, header)
         self.selected_points = []
@@ -103,11 +103,11 @@ class PairScatterPlot(ScatterPlots):
     def __init__(self):
         ScatterPlots.__init__(self)
         
-        header = pg.QtGui.QLabel()
+        header = pg.QtWidgets.QLabel()
         header.setText('<span style="font-weight: bold">Pair-wise Scatter Plot</span>')
         self.ctrlPanel.insertWidget(0, header)
         self.top_plot = None
-        self.menu = pg.QtGui.QMenu()
+        self.menu = pg.QtWidgets.QMenu()
         self.pair_actions = PairActions()
         for act in self.pair_actions.actions.values():
             self.menu.addAction(act)

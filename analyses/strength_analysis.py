@@ -20,7 +20,7 @@ import sklearn.svm, sklearn.preprocessing, sklearn.ensemble
 
 import pyqtgraph as pg
 import pyqtgraph.dockarea
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 
 from neuroanalysis.ui.plot_grid import PlotGrid
 from neuroanalysis.data import TSeries, TSeriesList
@@ -70,8 +70,8 @@ class ResponseStrengthAnalyzer(object):
         self._amp_recs = None
         self._base_recs = None
 
-        self.widget = QtGui.QWidget()
-        self.layout = QtGui.QGridLayout()
+        self.widget = QtWidgets.QWidget()
+        self.layout = QtWidgets.QGridLayout()
         self.widget.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
@@ -115,74 +115,74 @@ class ResponseStrengthAnalyzer(object):
         self.bg_trace_plot.addLine(x=10e-3, pen=(0, 0, 100), movable=False)
         self.fg_trace_plot.setXRange(0, 20e-3)
 
-        self.ctrl = QtGui.QWidget()
+        self.ctrl = QtWidgets.QWidget()
         self.ui = StrengthAnalysisCtrl()
         self.ui.setupUi(self.ctrl)        
         self.layout.addWidget(self.ctrl, 1, 0)
-        # self.ctrl_layout = QtGui.QGridLayout()
+        # self.ctrl_layout = QtWidgets.QGridLayout()
         # self.ctrl.setLayout(self.ctrl_layout)
         # self.ctrl_layout.setContentsMargins(0, 0, 0, 0)
 
         # self.h
-        # self.ui.field_combo = QtGui.QComboBox()
+        # self.ui.field_combo = QtWidgets.QComboBox()
         for field in ['dec_amp', 'amp', 'dec_latency', 'crosstalk']:
             self.ui.field_combo.addItem(field)
         # self.ctrl_layout.addWidget(self.ui.field_combo, 0, 0)
         self.ui.field_combo.currentIndexChanged.connect(self.update_scatter_plots)
         
-        # self.ui.qc_check = QtGui.QCheckBox('QC filter')
+        # self.ui.qc_check = QtWidgets.QCheckBox('QC filter')
         # self.ui.qc_check.setChecked(True)
         # self.ctrl_layout.addWidget(self.ui.qc_check, 0, 1)
         self.ui.qc_check.toggled.connect(self.replot_all)
         
-        # self.ui.bg_radio = QtGui.QRadioButton('bg noise')
+        # self.ui.bg_radio = QtWidgets.QRadioButton('bg noise')
         # self.ui.bg_radio.setChecked(True)
         # self.ctrl_layout.addWidget(self.ui.bg_radio, 0, 2)
         self.ui.bg_radio.toggled.connect(self.replot_all)
         
-        # self.pre_radio = QtGui.QRadioButton('presyn')
+        # self.pre_radio = QtWidgets.QRadioButton('presyn')
         # self.pre_radio.setChecked(False)
         # self.ctrl_layout.addWidget(self.pre_radio, 0, 3)        
 
-        # self.ui.deconv_check = QtGui.QCheckBox('deconvolve')
+        # self.ui.deconv_check = QtWidgets.QCheckBox('deconvolve')
         # self.ui.deconv_check.setChecked(False)
         # self.ctrl_layout.addWidget(self.ui.deconv_check, 1, 0)
         self.ui.deconv_check.toggled.connect(self.replot_all)
 
-        # self.ui.bsub_check = QtGui.QCheckBox('bsub')
+        # self.ui.bsub_check = QtWidgets.QCheckBox('bsub')
         # self.ui.bsub_check.setChecked(True)
         # self.ctrl_layout.addWidget(self.ui.bsub_check, 1, 1)
         self.ui.bsub_check.toggled.connect(self.replot_all)
 
-        # self.ui.lpf_check = QtGui.QCheckBox('lpf')
+        # self.ui.lpf_check = QtWidgets.QCheckBox('lpf')
         # self.ui.lpf_check.setChecked(False)
         # self.ctrl_layout.addWidget(self.ui.lpf_check, 1, 2)
         self.ui.lpf_check.toggled.connect(self.replot_all)
 
-        # self.ui.ar_check = QtGui.QCheckBox('crosstalk')
+        # self.ui.ar_check = QtWidgets.QCheckBox('crosstalk')
         # self.ui.ar_check.setChecked(False)
         # self.ctrl_layout.addWidget(self.ui.ar_check, 1, 3)
         self.ui.ar_check.toggled.connect(self.replot_all)
 
-        # self.ui.align_check = QtGui.QCheckBox('align')
+        # self.ui.align_check = QtWidgets.QCheckBox('align')
         # self.ui.align_check.setChecked(True)
         # self.ctrl_layout.addWidget(self.ui.align_check, 1, 4)
         self.ui.align_check.toggled.connect(self.replot_all)
 
-        # self.pulse_ctrl = QtGui.QWidget()
+        # self.pulse_ctrl = QtWidgets.QWidget()
         # self.ctrl_layout.addWidget(self.pulse_ctrl, 2, 0, 1, 5)
-        self.pulse_layout = QtGui.QHBoxLayout()
+        self.pulse_layout = QtWidgets.QHBoxLayout()
         self.ui.pulse_ctrl.setLayout(self.pulse_layout)
         self.pulse_layout.setContentsMargins(0, 0, 0, 0)
         self.pulse_layout.setSpacing(0)
 
-        # self.color_by_pulse_check = QtGui.QCheckBox('color pulse n')
+        # self.color_by_pulse_check = QtWidgets.QCheckBox('color pulse n')
         # self.pulse_layout.addWidget(self.color_by_pulse_check)
         # self.color_by_pulse_check.toggled.connect(self.update_scatter_plots)
 
         self.pulse_checks = []
         for i in range(12):
-            c = QtGui.QCheckBox()
+            c = QtWidgets.QCheckBox()
             c.setChecked(True)
             self.pulse_checks.append(c)
             self.pulse_layout.addWidget(c)
@@ -856,7 +856,7 @@ class PairView(pg.QtCore.QObject):
         # global session for querying from DB
         self.session = db.session()
 
-        win = pg.QtGui.QSplitter()
+        win = pg.QtWidgets.QSplitter()
         win.setOrientation(pg.QtCore.Qt.Horizontal)
         win.resize(1000, 800)
         win.show()

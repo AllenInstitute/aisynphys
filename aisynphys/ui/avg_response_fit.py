@@ -7,7 +7,7 @@ from aisynphys.data import PulseResponseList
 
 class AvgResponseFitUi(object):
     def __init__(self):
-        self.widget = pg.QtGui.QSplitter(pg.QtCore.Qt.Horizontal)
+        self.widget = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Horizontal)
         self.plots = {}
         for clamp_mode in ('ic', 'vc'):
             units = {'ic': 'V', 'vc': 'A'}[clamp_mode]

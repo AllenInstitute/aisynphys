@@ -17,7 +17,7 @@ class PulseResponseQCUI(object):
         self.qc_text.setHeaderLabels(['QC failures', 'type', 'value'])
         self.console = pg.console.ConsoleWidget()
 
-        self.widget = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+        self.widget = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
         self.widget.addWidget(self.pw)        
         self.widget.addWidget(self.qc_text)
         self.widget.addWidget(self.console)

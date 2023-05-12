@@ -146,16 +146,16 @@ if __name__ == '__main__':
         {'name': 'run', 'type': 'action'},
     ])
 
-    vs = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+    vs = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
 
     pt = pg.parametertree.ParameterTree()
     vs.addWidget(pt)
     pt.setParameters(params)
 
-    wab_table = pg.QtGui.QTableWidget()
+    wab_table = pg.QtWidgets.QTableWidget()
     vs.addWidget(wab_table)
 
-    hs = pg.QtGui.QSplitter(pg.QtCore.Qt.Horizontal)
+    hs = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Horizontal)
     hs.addWidget(vs)
 
     gl = pg.GraphicsLayoutWidget()
@@ -202,7 +202,7 @@ if __name__ == '__main__':
         wab_table.setColumnCount(n_types)
         for i in range(n_types):
             for j in range(n_types):
-                item = pg.QtGui.QTableWidgetItem('0.1')
+                item = pg.QtWidgets.QTableWidgetItem('0.1')
                 wab_table.setItem(i, j, item)
             wab_table.setColumnWidth(i, 40)
             wab_table.setRowHeight(i, 40)

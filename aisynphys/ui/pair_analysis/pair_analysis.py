@@ -47,14 +47,14 @@ modes = ['vc', 'ic']
 holdings = [-55, -70]
 
 
-class PairAnalysisWindow(pg.QtGui.QWidget):
+class PairAnalysisWindow(pg.QtWidgets.QWidget):
     def __init__(self, default_session, notes_session):
-        pg.QtGui.QWidget.__init__(self)
+        pg.QtWidgets.QWidget.__init__(self)
         self.default_session = default_session
         self.notes_session = notes_session
-        self.layout = pg.QtGui.QGridLayout()
+        self.layout = pg.QtWidgets.QGridLayout()
         self.setLayout(self.layout)
-        self.h_splitter = pg.QtGui.QSplitter()
+        self.h_splitter = pg.QtWidgets.QSplitter()
         self.h_splitter.setOrientation(pg.QtCore.Qt.Horizontal)
         self.pair_analyzer = PairAnalysis()
         self.fit_explorer = None
@@ -68,8 +68,8 @@ class PairAnalysisWindow(pg.QtGui.QWidget):
         self.fit_ptree = ptree.ParameterTree(showHeader=False)
         self.fit_ptree.addParameters(self.output_params, showTop=False)
         self.save_btn = pg.FeedbackButton('Save Analysis')
-        self.expt_btn = pg.QtGui.QPushButton('Set Experiments')
-        self.fit_btn = pg.QtGui.QPushButton('Fit Responses')
+        self.expt_btn = pg.QtWidgets.QPushButton('Set Experiments')
+        self.fit_btn = pg.QtWidgets.QPushButton('Fit Responses')
         self.ic_plot = self.pair_analyzer.ic_plot
         self.vc_plot = self.pair_analyzer.vc_plot
         self.select_ptree = ptree.ParameterTree(showHeader=False)
@@ -86,9 +86,9 @@ class PairAnalysisWindow(pg.QtGui.QWidget):
             {'name': 'Synapse is None', 'type': 'bool'}])
         [self.select_ptree.addParameters(param) for param in [self.data_type, self.rig_select, self.operator_select, self.hash_select]]
         self.experiment_browser = self.pair_analyzer.experiment_browser
-        self.v_splitter = pg.QtGui.QSplitter()
+        self.v_splitter = pg.QtWidgets.QSplitter()
         self.v_splitter.setOrientation(pg.QtCore.Qt.Vertical)
-        self.expt_splitter = pg.QtGui.QSplitter()
+        self.expt_splitter = pg.QtWidgets.QSplitter()
         self.expt_splitter.setOrientation(pg.QtCore.Qt.Vertical)
         self.h_splitter.addWidget(self.expt_splitter)
         self.expt_splitter.addWidget(self.select_ptree)
@@ -100,13 +100,13 @@ class PairAnalysisWindow(pg.QtGui.QWidget):
         self.v_splitter.addWidget(self.fit_ptree)
         self.v_splitter.addWidget(self.save_btn)
         self.v_splitter.setSizes([200, 20, 20,400, 20])
-        # self.next_pair_button = pg.QtGui.QPushButton("Load Next Pair")
+        # self.next_pair_button = pg.QtWidgets.QPushButton("Load Next Pair")
         # self.v_splitter.addWidget(self.next_pair_button)
         self.h_splitter.addWidget(self.vc_plot.grid)
         self.h_splitter.addWidget(self.ic_plot.grid)
         self.fit_compare = self.pair_analyzer.fit_compare
         self.meta_compare = self.pair_analyzer.meta_compare
-        self.v2_splitter = pg.QtGui.QSplitter()
+        self.v2_splitter = pg.QtWidgets.QSplitter()
         self.v2_splitter.setOrientation(pg.QtCore.Qt.Vertical)
         self.v2_splitter.addWidget(self.fit_compare)
         self.v2_splitter.addWidget(self.meta_compare)
@@ -730,10 +730,10 @@ class PairAnalysis(object):
             session.commit()
         else:
             self.print_pair_notes(meta, record)
-            msg = pg.QtGui.QMessageBox.question(None, "Pair Analysis", 
+            msg = pg.QtWidgets.QMessageBox.question(None, "Pair Analysis", 
                 "The record you are about to save conflicts with what is in the Pair Notes database.\nYou can see the differences highlighted in red.\nWould you like to overwrite?",
-                pg.QtGui.QMessageBox.Yes | pg.QtGui.QMessageBox.No)
-            if msg == pg.QtGui.QMessageBox.Yes:
+                pg.QtWidgets.QMessageBox.Yes | pg.QtWidgets.QMessageBox.No)
+            if msg == pg.QtWidgets.QMessageBox.Yes:
                 record.notes = meta
                 record.modification_time = datetime.datetime.now()
                 session.commit() 

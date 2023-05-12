@@ -1,4 +1,4 @@
-from pyqtgraph import QtGui, QtCore
+from pyqtgraph import QtWidgets, QtCore
 from pyqtgraph import parametertree as ptree
 import numpy as np
 from collections import OrderedDict

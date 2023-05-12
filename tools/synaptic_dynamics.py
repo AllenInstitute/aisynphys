@@ -7,12 +7,12 @@ from aisynphys.ui.experiment_browser import ExperimentBrowser
 from aisynphys.dynamics import pulse_response_query, sorted_pulse_responses
 
 
-class DynamicsWindow(pg.QtGui.QSplitter):
+class DynamicsWindow(pg.QtWidgets.QSplitter):
     def __init__(self):
         self.loaded_pair = None
         
-        pg.QtGui.QSplitter.__init__(self, pg.QtCore.Qt.Horizontal)
-        self.ctrl_split = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+        pg.QtWidgets.QSplitter.__init__(self, pg.QtCore.Qt.Horizontal)
+        self.ctrl_split = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
         self.addWidget(self.ctrl_split)
         
         self.browser = ExperimentBrowser()
@@ -28,7 +28,7 @@ class DynamicsWindow(pg.QtGui.QSplitter):
         ])
         self.ptree.setParameters(self.params)
         
-        self.scroll_area = pg.QtGui.QScrollArea()
+        self.scroll_area = pg.QtWidgets.QScrollArea()
         self.addWidget(self.scroll_area)
         
         self.view = pg.GraphicsLayoutWidget()

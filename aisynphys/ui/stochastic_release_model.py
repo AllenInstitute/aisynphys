@@ -4,7 +4,7 @@ import numpy as np
 import scipy.stats
 import pyqtgraph as pg
 import pyqtgraph.multiprocess
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 from aisynphys.stochastic_release_model import StochasticReleaseModel
 from aisynphys.ui.ndslicer import NDSlicer
 
@@ -13,13 +13,13 @@ data_color = (0, 128, 255)
 model_color = (255, 128, 0)
 
 
-class ModelDisplayWidget(QtGui.QWidget):
+class ModelDisplayWidget(QtWidgets.QWidget):
     """UI containing an NDSlicer for visualizing the complete model parameter space, and
     a ModelSingleResultWidget for showing more detailed results from individual points in the parameter space.
     """
     def __init__(self, model_runner):
-        QtGui.QWidget.__init__(self)
-        self.layout = QtGui.QGridLayout()
+        QtWidgets.QWidget.__init__(self)
+        self.layout = QtWidgets.QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
         
@@ -135,23 +135,23 @@ class ModelDisplayWidget(QtGui.QWidget):
             self.slicer.set_index(index)
 
 
-class ModelSingleResultWidget(QtGui.QWidget):
+class ModelSingleResultWidget(QtWidgets.QWidget):
     """Plots event amplitudes and distributions for a single stochastic model run.
     """
     def __init__(self):
         self.result = None
         self._random_model_result = None
 
-        QtGui.QWidget.__init__(self)
-        self.layout = QtGui.QGridLayout()
+        QtWidgets.QWidget.__init__(self)
+        self.layout = QtWidgets.QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
 
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.layout.addWidget(self.splitter)
         
-        self.btn_layout = QtGui.QVBoxLayout()
-        self.btn_widget = QtGui.QWidget()
+        self.btn_layout = QtWidgets.QVBoxLayout()
+        self.btn_widget = QtWidgets.QWidget()
         self.btn_widget.setLayout(self.btn_layout)
         self.splitter.addWidget(self.btn_widget)
         
@@ -164,7 +164,7 @@ class ModelSingleResultWidget(QtGui.QWidget):
             'optimization': ModelOptimizationPlot(self),
         }
         for name, panel in self.panels.items():
-            btn = QtGui.QPushButton(name)
+            btn = QtWidgets.QPushButton(name)
             self.btn_layout.addWidget(btn)
             btn.setCheckable(True)
             btn.toggled.connect(panel.set_visible)
@@ -200,8 +200,8 @@ class ModelResultView(object):
         """
         self._parent = parent
         self._visible = False
-        self.widget = QtGui.QWidget()
-        self.layout = QtGui.QGridLayout()
+        self.widget = QtWidgets.QWidget()
+        self.layout = QtWidgets.QGridLayout()
         self.widget.setLayout(self.layout)
         parent.splitter.addWidget(self.widget)
         self.layout.setSpacing(2)
@@ -264,20 +264,20 @@ class ModelEventPlot(ModelResultView):
 
         self.stim_regions = []
 
-        self.ctrl = QtGui.QWidget()
-        self.hl = QtGui.QHBoxLayout()
+        self.ctrl = QtWidgets.QWidget()
+        self.hl = QtWidgets.QHBoxLayout()
         self.hl.setSpacing(2)
         self.hl.setContentsMargins(0, 0, 0, 0)
         self.ctrl.setLayout(self.hl)
         self.layout.addWidget(self.ctrl)
 
         self.plot_checks = {
-            'amplitude': QtGui.QCheckBox('amplitude'),
-            'likelihood': QtGui.QCheckBox('likelihood'),
-            'vesicle_pool': QtGui.QCheckBox('vesicle pool'),
-            'release_probability': QtGui.QCheckBox('release probability'),
-            'depression': QtGui.QCheckBox('depression'),
-            'facilitation': QtGui.QCheckBox('facilitation'),
+            'amplitude': QtWidgets.QCheckBox('amplitude'),
+            'likelihood': QtWidgets.QCheckBox('likelihood'),
+            'vesicle_pool': QtWidgets.QCheckBox('vesicle pool'),
+            'release_probability': QtWidgets.QCheckBox('release probability'),
+            'depression': QtWidgets.QCheckBox('depression'),
+            'facilitation': QtWidgets.QCheckBox('facilitation'),
         }
         self.plot_checks['amplitude'].setChecked(True)
         for name,c in self.plot_checks.items():
@@ -440,16 +440,16 @@ class ModelEventCorrelationPlot(ModelResultView):
         self.plots[0][0].setTitle('data')
         self.plots[0][1].setTitle('model')
 
-        # self.ctrl = QtGui.QWidget()
-        # self.hl = QtGui.QHBoxLayout()
+        # self.ctrl = QtWidgets.QWidget()
+        # self.hl = QtWidgets.QHBoxLayout()
         # self.hl.setSpacing(2)
         # self.hl.setContentsMargins(0, 0, 0, 0)
         # self.ctrl.setLayout(self.hl)
         # self.layout.addWidget(self.ctrl)
 
         # self.mode_radios = {
-        #     'all_events': QtGui.QRadioButton('all events'),
-        #     'first_in_train': QtGui.QRadioButton('first in train'),
+        #     'all_events': QtWidgets.QRadioButton('all events'),
+        #     'first_in_train': QtWidgets.QRadioButton('first in train'),
         # }
         # self.mode_radios['all_events'].setChecked(True)
         # for name,r in self.mode_radios.items():

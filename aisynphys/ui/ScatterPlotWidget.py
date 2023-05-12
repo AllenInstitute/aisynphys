@@ -1,4 +1,4 @@
-# from pyqtgraph import QtGui, QtCore
+# from pyqtgraph import QtWidgets, QtCore
 from pyqtgraph.widgets.PlotWidget import PlotWidget
 from pyqtgraph.widgets.DataFilterWidget import DataFilterParameter
 from pyqtgraph.widgets.ColorMapWidget import ColorMapParameter
@@ -15,7 +15,7 @@ import numpy as np
 
 __all__ = ['ScatterPlotWidget']
 
-class ScatterPlotWidget(pg.QtGui.QSplitter):
+class ScatterPlotWidget(pg.QtWidgets.QSplitter):
     """
     This is a high-level widget for exploring relationships in tabular data.
         
@@ -40,10 +40,10 @@ class ScatterPlotWidget(pg.QtGui.QSplitter):
     sigScatterPlotClicked = pg.QtCore.Signal(object, object, object)
     
     def __init__(self, parent=None):
-        pg.QtGui.QSplitter.__init__(self, pg.QtCore.Qt.Horizontal)
-        self.ctrlPanel = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+        pg.QtWidgets.QSplitter.__init__(self, pg.QtCore.Qt.Horizontal)
+        self.ctrlPanel = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
         self.addWidget(self.ctrlPanel)
-        self.fieldList = pg.QtGui.QListWidget()
+        self.fieldList = pg.QtWidgets.QListWidget()
         self.fieldList.setSelectionMode(self.fieldList.ExtendedSelection)
         self.ptree = pg.parametertree.ParameterTree(showHeader=False)
         self.filter = DataFilterParameter()
@@ -90,7 +90,7 @@ class ScatterPlotWidget(pg.QtGui.QSplitter):
         self.mouseOverField = mouseOverField
         self.fieldList.clear()
         for f,opts in fields:
-            item = pg.QtGui.QListWidgetItem(f)
+            item = pg.QtWidgets.QListWidgetItem(f)
             item.opts = opts
             item = self.fieldList.addItem(item)
         self.filter.setFields(fields)

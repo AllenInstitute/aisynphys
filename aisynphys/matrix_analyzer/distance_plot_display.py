@@ -14,12 +14,12 @@ from neuroanalysis.ui.plot_grid import PlotGrid
 from aisynphys.ui.graphics import distance_plot 
 
 
-class DistancePlotTab(pg.QtGui.QWidget):
+class DistancePlotTab(pg.QtWidgets.QWidget):
     def __init__(self):
-        pg.QtGui.QWidget.__init__(self)
-        self.layout = pg.QtGui.QGridLayout()
+        pg.QtWidgets.QWidget.__init__(self)
+        self.layout = pg.QtWidgets.QGridLayout()
         self.setLayout(self.layout)
-        self.v_splitter = pg.QtGui.QSplitter()
+        self.v_splitter = pg.QtWidgets.QSplitter()
         self.v_splitter.setOrientation(pg.QtCore.Qt.Vertical)
         self.distance_plot = DistancePlot()
         self.ptree = ptree.ParameterTree(showHeader=False)

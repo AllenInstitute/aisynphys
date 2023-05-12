@@ -33,21 +33,21 @@ class SignalHandler(pg.QtCore.QObject):
         sigOutputChanged = pg.QtCore.Signal(object) #self
 
 
-class MainWindow(pg.QtGui.QWidget):
+class MainWindow(pg.QtWidgets.QWidget):
     def __init__(self):
-        pg.QtGui.QWidget.__init__(self)
-        self.layout = pg.QtGui.QGridLayout()
+        pg.QtWidgets.QWidget.__init__(self)
+        self.layout = pg.QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.h_splitter = pg.QtGui.QSplitter()
+        self.h_splitter = pg.QtWidgets.QSplitter()
         self.h_splitter.setOrientation(pg.QtCore.Qt.Horizontal)
         self.layout.addWidget(self.h_splitter, 0, 0)
-        self.control_panel = pg.QtGui.QWidget()
-        self.ctrl_layout = pg.QtGui.QGridLayout()
+        self.control_panel = pg.QtWidgets.QWidget()
+        self.ctrl_layout = pg.QtWidgets.QGridLayout()
         self.ctrl_layout.setContentsMargins(0, 0, 0, 0)
         self.control_panel.setLayout(self.ctrl_layout)
         self.h_splitter.addWidget(self.control_panel)
-        self.update_button = pg.QtGui.QPushButton("Update Results")
+        self.update_button = pg.QtWidgets.QPushButton("Update Results")
         self.ctrl_layout.addWidget(self.update_button, 0, 0)
         self.ptree = ptree.ParameterTree(showHeader=False)
         self.ctrl_layout.addWidget(self.ptree, 1, 0)
@@ -58,9 +58,9 @@ class MainWindow(pg.QtGui.QWidget):
         self.h_splitter.setSizes([500, 600, 400])
 
 
-class Tabs(pg.QtGui.QTabWidget):
+class Tabs(pg.QtWidgets.QTabWidget):
     def __init__(self, parent=None):
-        pg.QtGui.QTabWidget.__init__(self)
+        pg.QtWidgets.QTabWidget.__init__(self)
 
         self.hist_tab = HistogramTab()
         self.addTab(self.hist_tab, 'Histogram and TSeries')
@@ -316,8 +316,8 @@ class MatrixAnalyzer(object):
     def save_preset(self):
         name = self.params['Presets', 'Save as Preset', 'Preset Name']
         if not name:
-            msg = pg.QtGui.QMessageBox.warning(self.main_window, "Preset Name", "Please enter a name for your preset in the drop down under 'Preset Name'.",
-            pg.QtGui.QMessageBox.Ok)
+            msg = pg.QtWidgets.QMessageBox.warning(self.main_window, "Preset Name", "Please enter a name for your preset in the drop down under 'Preset Name'.",
+            pg.QtWidgets.QMessageBox.Ok)
         else:
             self.presets = self.load_presets()
             cm_state = self.colormap_to_json()
@@ -544,9 +544,9 @@ class MatrixAnalyzer(object):
             try:
                 group_results = analysis.group_result(self.pair_groups)
             except AttributeError:
-                    pg.QtGui.QMessageBox.information(self.main_window, 'No Pair Results Generated', 'Please check that you have at least one Cell Class selected, \
+                    pg.QtWidgets.QMessageBox.information(self.main_window, 'No Pair Results Generated', 'Please check that you have at least one Cell Class selected, \
                         if so this filter set produced no results, try something else.\nYou may analyze cell features',
-                        pg.QtGui.QMessageBox.Ok)
+                        pg.QtWidgets.QMessageBox.Ok)
                     break
             if a == 0:
                 self.results = results

@@ -11,12 +11,12 @@ import pandas as pd
 import numpy as np
 from aisynphys.ui.ScatterPlotWidget import ScatterPlotWidget
 
-class CellScatterTab(pg.QtGui.QWidget):
+class CellScatterTab(pg.QtWidgets.QWidget):
     def __init__(self):
-        pg.QtGui.QWidget.__init__(self)
-        self.layout = pg.QtGui.QGridLayout()
+        pg.QtWidgets.QWidget.__init__(self)
+        self.layout = pg.QtWidgets.QGridLayout()
         self.setLayout(self.layout)
-        self.v_splitter = pg.QtGui.QSplitter()
+        self.v_splitter = pg.QtWidgets.QSplitter()
         # self.v_splitter.setOrientation(pg.QtCore.Qt.Vertical)
         # self.layout.addWidget(self.v_splitter)
         self.cell_scatter = CellScatterPlot()

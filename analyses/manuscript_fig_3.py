@@ -197,10 +197,10 @@ if __name__ == '__main__':
             plt.addLine(x=0)
             plt.setDownsampling(auto=True, mode='peak')
             plt.setClipToView(True)
-            hbar = pg.QtGui.QGraphicsLineItem(0, 0, 2e-3, 0)
+            hbar = pg.QtWidgets.QGraphicsLineItem(0, 0, 2e-3, 0)
             hbar.setPen(pg.mkPen(color='k', width=5))
             plt.addItem(hbar)
-            vbar = pg.QtGui.QGraphicsLineItem(0, 0, 0, 100e-6)
+            vbar = pg.QtWidgets.QGraphicsLineItem(0, 0, 0, 100e-6)
             vbar.setPen(pg.mkPen(color='k', width=5))
             plt.addItem(vbar)
 
@@ -278,7 +278,7 @@ if __name__ == '__main__':
         write_csv(csv_file, hist_y, "Figure 3C; {name}; PSP amplitude distribution counts per bin".format(name=name))
         p()
 
-        pg.QtGui.QApplication.processEvents()
+        pg.QtWidgets.QApplication.processEvents()
 
 
         # Plot detectability analysis
@@ -353,12 +353,12 @@ if __name__ == '__main__':
             write_csv(csv_file, x, "Figure 3D; {name}; {rise_time:0.3g} ms rise time; simulated PSP amplitude (V)".format(name=name, rise_time=rtime*1000))
             write_csv(csv_file, y, "Figure 3D; {name}; {rise_time:0.3g} ms rise time; classifier decision probability".format(name=name, rise_time=rtime*1000))
             c.scatter.sigClicked.connect(clicked)
-            pg.QtGui.QApplication.processEvents()
+            pg.QtWidgets.QApplication.processEvents()
 
             if new_results:
                 pickle.dump(cache, open(cachefile, 'wb'))
 
-        pg.QtGui.QApplication.processEvents()
+        pg.QtWidgets.QApplication.processEvents()
 
     # Handle selected individual connections
     next_row = 0

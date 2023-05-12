@@ -13,9 +13,9 @@ pre_cell_id = sys.argv[2]
 post_cell_id = sys.argv[3]
 
 ui = PulseResponseQCUI()
-skip_btn = pg.QtGui.QPushButton('skip')
+skip_btn = pg.QtWidgets.QPushButton('skip')
 ui.widget.addWidget(skip_btn)
-save_btn = pg.QtGui.QPushButton('save')
+save_btn = pg.QtWidgets.QPushButton('save')
 ui.widget.addWidget(save_btn)
 
 def iter_resps():

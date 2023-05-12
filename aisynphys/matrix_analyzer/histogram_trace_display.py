@@ -17,12 +17,12 @@ from .analyzers import results_scatter, FormattableNumber
 from ..ui.actions import PairActions
 
 
-class HistogramTab(pg.QtGui.QWidget):
+class HistogramTab(pg.QtWidgets.QWidget):
     def __init__(self):
-        pg.QtGui.QWidget.__init__(self)
-        self.layout = pg.QtGui.QGridLayout()
+        pg.QtWidgets.QWidget.__init__(self)
+        self.layout = pg.QtWidgets.QGridLayout()
         self.setLayout(self.layout)
-        self.v_splitter = pg.QtGui.QSplitter()
+        self.v_splitter = pg.QtWidgets.QSplitter()
         self.v_splitter.setOrientation(pg.QtCore.Qt.Vertical)
         self.layout.addWidget(self.v_splitter)
         self.hist = MatrixHistogramPlot()
@@ -39,7 +39,7 @@ class MatrixHistogramPlot(pg.GraphicsLayoutWidget):
         self.scatter = None
         self.trace_plots = None
         self.trace_plot_list = []
-        self.menu = pg.QtGui.QMenu()
+        self.menu = pg.QtWidgets.QMenu()
         self.pair_actions = PairActions()
         for act in self.pair_actions.actions.values():
             self.menu.addAction(act)
@@ -135,7 +135,7 @@ class MatrixTSeriesPlot(pg.GraphicsLayoutWidget):
         pg.GraphicsLayoutWidget.__init__(self)
         self.setRenderHints(self.renderHints() | pg.QtGui.QPainter.Antialiasing)
 
-        self.menu = pg.QtGui.QMenu()
+        self.menu = pg.QtWidgets.QMenu()
         self.pair_actions = PairActions()
         for act in self.pair_actions.actions.values():
             self.menu.addAction(act)

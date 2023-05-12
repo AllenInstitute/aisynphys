@@ -1,16 +1,16 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 from neuroanalysis.ui.plot_grid import PlotGrid
 from neuroanalysis.miesnwb import MiesNwb
 from neuroanalysis.filter import remove_artifacts
 
 
-class MultipatchMatrixView(QtGui.QWidget):
+class MultipatchMatrixView(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.layout = QtGui.QGridLayout()
+        QtWidgets.QWidget.__init__(self, parent)
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
 

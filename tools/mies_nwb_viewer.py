@@ -60,4 +60,4 @@ if __name__ == '__main__':
 
     # start Qt event loop if this is not an interactive python session
     if sys.flags.interactive == 0:
-        pg.QtGui.QApplication.exec_()
+        pg.QtWidgets.QApplication.exec_()

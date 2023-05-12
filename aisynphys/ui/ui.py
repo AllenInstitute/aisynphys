@@ -2,20 +2,20 @@ from collections import OrderedDict
 import os, sys, subprocess, datetime
 import numpy as np
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui
+from pyqtgraph.Qt import QtWidgets
 from neuroanalysis.ui.plot_grid import PlotGrid
 from neuroanalysis.miesnwb import MiesNwb
 from .. import constants
 from .. import config
 
 
-class SynapseTreeWidget(QtGui.QTreeWidget):
+class SynapseTreeWidget(QtWidgets.QTreeWidget):
     """Displays a list of known synapses, given a lit of experiments.
     
     Provides ui for filtering and selecting.
     """
     def __init__(self, expts, parent=None):
-        QtGui.QTreeWidget.__init__(self, parent)
+        QtWidgets.QTreeWidget.__init__(self, parent)
         self.setColumnCount(3)
         self.expts = expts
         for syn in expts.connection_summary():
@@ -23,7 +23,7 @@ class SynapseTreeWidget(QtGui.QTreeWidget):
             self.addTopLevelItem(item)
 
     
-class SynapseTreeItem(QtGui.QTreeWidgetItem):
+class SynapseTreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, expt, cells):
         self.expt = expt
         self.cells = cells
@@ -35,22 +35,22 @@ class SynapseTreeItem(QtGui.QTreeWidgetItem):
             
         ]
         
-        QtGui.QTreeWidgetItem.__init__(self, fields)
+        QtWidgets.QTreeWidgetItem.__init__(self, fields)
 
 
-class ExperimentInfoWidget(QtGui.QWidget):
+class ExperimentInfoWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         
         self.expt = None
         
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         
         self.info_tree = pg.DataTreeWidget()
         self.layout.addWidget(self.info_tree, self.layout.rowCount(), 0)
         
-        self.biocytin_btn = QtGui.QPushButton('biocytin image...')
+        self.biocytin_btn = QtWidgets.QPushButton('biocytin image...')
         self.biocytin_btn.clicked.connect(self.show_biocytin)
         self.layout.addWidget(self.biocytin_btn, self.layout.rowCount(), 0)
         
@@ -72,13 +72,13 @@ class ExperimentInfoWidget(QtGui.QWidget):
             os.system("firefox " + self.expt.biocytin_image_url)
 
 
-class ExperimentTimeline(QtGui.QWidget):
+class ExperimentTimeline(QtWidgets.QWidget):
     def __init__(self):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.channels = None
         self.start_time = None  # starting time according to NWB file
         
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
         

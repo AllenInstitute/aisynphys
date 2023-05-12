@@ -1,11 +1,11 @@
 from collections import OrderedDict
 import numpy as np
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 import pyqtgraph as pg
 import pyqtgraph.dockarea
 
 
-class NDSlicer(QtGui.QWidget):
+class NDSlicer(QtWidgets.QWidget):
     """Tool for visualizing 1D and 2D slices from an ND array.
     
     Parameters
@@ -20,8 +20,8 @@ class NDSlicer(QtGui.QWidget):
     selection_changed = QtCore.Signal(object)
     
     def __init__(self, axes):
-        QtGui.QWidget.__init__(self)
-        self.layout = QtGui.QGridLayout()
+        QtWidgets.QWidget.__init__(self)
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
         
@@ -53,7 +53,7 @@ class NDSlicer(QtGui.QWidget):
         self.params.child('max project').sigTreeStateChanged.connect(self.max_project_changed)
         self.params.child('color axis').axis_color_changed.connect(self.axis_color_changed)
         
-        self.ctrl_split = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+        self.ctrl_split = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
         
         self.ptree = pg.parametertree.ParameterTree(showHeader=False)
         self.ptree.setParameters(self.params, showTop=False)

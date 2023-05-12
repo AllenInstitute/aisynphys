@@ -17,16 +17,16 @@ from ..yaml_local import yaml
 from acq4.util.DataManager import getDirHandle
 import pyqtgraph as pg
 import pyqtgraph.console
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtCore
 
 
 fail_color = (255, 200, 200)
 pass_color = (200, 255, 200)
 
 
-class Dashboard(QtGui.QWidget):
+class Dashboard(QtWidgets.QWidget):
     def __init__(self, limit=0, no_thread=False, filter_defaults=None):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
 
         # fields displayed in ui
         self.visible_fields = [
@@ -71,20 +71,20 @@ class Dashboard(QtGui.QWidget):
         self.selected = None
 
         # set up UI
-        self.layout = QtGui.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.layout.addWidget(self.splitter, 0, 0)
 
-        self.left_vbox_widget = QtGui.QWidget()
+        self.left_vbox_widget = QtWidgets.QWidget()
         self.splitter.addWidget(self.left_vbox_widget)
-        self.left_vbox = QtGui.QVBoxLayout()
+        self.left_vbox = QtWidgets.QVBoxLayout()
         self.left_vbox_widget.setLayout(self.left_vbox)
         self.left_vbox.setContentsMargins(0, 0, 0, 0)
 
-        self.search_text = QtGui.QLineEdit()
+        self.search_text = QtWidgets.QLineEdit()
         self.search_text.setPlaceholderText('search')
         # self.search_text.setClearButtonEnabled(True)   # Qt 5
         self.left_vbox.addWidget(self.search_text)
@@ -105,7 +105,7 @@ class Dashboard(QtGui.QWidget):
         self.filter.addFilter('rig')
         self.filter.addFilter('project')
 
-        self.right_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.right_splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.splitter.addWidget(self.right_splitter)
 
         self.expt_tree = pg.TreeWidget()
@@ -140,16 +140,16 @@ class Dashboard(QtGui.QWidget):
         self.right_splitter.addWidget(self.console)
         self.console.hide()
 
-        self.console_btn = QtGui.QPushButton('console')
+        self.console_btn = QtWidgets.QPushButton('console')
         self.console_btn.setCheckable(True)
         self.console_btn.toggled.connect(self.console_toggled)
 
-        self.poll_btn = QtGui.QPushButton('poll')
+        self.poll_btn = QtWidgets.QPushButton('poll')
         self.poll_btn.setCheckable(True)
         self.poll_btn.setChecked(True)
         self.poll_btn.toggled.connect(self.poll_toggled)
 
-        self.status = QtGui.QStatusBar()
+        self.status = QtWidgets.QStatusBar()
         self.status.setMaximumHeight(25)
         self.layout.addWidget(self.status, 1, 0)
         self.status.addPermanentWidget(self.poll_btn)
@@ -168,7 +168,7 @@ class Dashboard(QtGui.QWidget):
         self.reload_action.triggered.connect(self.reload_clicked)
         # self.addAction(self.reload_action)
 
-        self.menu = QtGui.QMenu()
+        self.menu = QtWidgets.QMenu()
         self.menu.addAction(self.reload_action)
         
         # Add generic experiment context menu actions

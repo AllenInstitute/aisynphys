@@ -11,12 +11,12 @@ from aisynphys.pulse_response_strength import deconv_filter
 from aisynphys import config
 
 
-class SynapseEventWindow(pg.QtGui.QSplitter):
+class SynapseEventWindow(pg.QtWidgets.QSplitter):
     def __init__(self):
         self.loaded_pair = None
         
-        pg.QtGui.QSplitter.__init__(self, pg.QtCore.Qt.Horizontal)
-        self.ctrl_split = pg.QtGui.QSplitter(pg.QtCore.Qt.Vertical)
+        pg.QtWidgets.QSplitter.__init__(self, pg.QtCore.Qt.Horizontal)
+        self.ctrl_split = pg.QtWidgets.QSplitter(pg.QtCore.Qt.Vertical)
         self.addWidget(self.ctrl_split)
         
         self.browser = ExperimentBrowser()
