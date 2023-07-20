@@ -18,13 +18,13 @@ DRIVER_LAYERS = {
 
 # note: the lower-case af488 and cascade_blue are for backward compatibility; these
 # may be removed at some point
-ALL_LABELS = ['biocytin', 'af488', 'cascade_blue'] + list(FLUOROPHORES.keys())
+ALL_LABELS = ['biocytin', 'af488', 'af594', 'cascade_blue'] + list(FLUOROPHORES.keys())
 
 LAYERS = ['1', '2', '2/3', '3', '4', '5', '5a', '5b', '6']
 
 ACSF_RECIPES = ["Standard", "ACSF III (no blockers)", "2mM Ca & Mg", "1.3mM Ca & 1mM Mg", "4mM Ca", "4mM Ca + TTx,4AP", "mixed"]
 INTERNAL_RECIPES = ["Standard K-Gluc", "K-Gluc -EGTA", "K-Gluc 1uM EGTA", 'PatchSeq', 'Cesium', 'mixed']
-INTERNAL_DYES = ['Cascade Blue', 'AF488', 'no dye']
+INTERNAL_DYES = ['Cascade Blue', 'AF488', 'AF594', 'no dye']
 
 
 INJECTIONS = {

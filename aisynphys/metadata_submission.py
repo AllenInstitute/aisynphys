@@ -282,16 +282,16 @@ class ExperimentMetadataSubmission(object):
                # 12-well plates
                 if site_date > datetime(2020, 12, 6):
                     # added M or H identifier to plate for mouse and human
-                    m = re.match(r'multi_(\d{2})(\d{2})(\d{2})_(2[1-9])_([A-C]0[1-4])_(M|H)', hist_well)
+                    well_name_regex_match = re.match(r'(multi|Ephys)_(\d{2})(\d{2})(\d{2})_(2[1-9])_([A-C]0[1-4])_(M|H)', hist_well)
                 else:
-                    m = re.match(r'multi_(\d{2})(\d{2})(\d{2})_(2[1-9])_([A-C]0[1-4])', hist_well)
+                    well_name_regex_match = re.match(r'(multi|Ephys)_(\d{2})(\d{2})(\d{2})_(2[1-9])_([A-C]0[1-4])', hist_well)
             else:
                # older experiments used 24-well plates
-               m = re.match(r'multi_(\d{2})(\d{2})(\d{2})_(2[1-9])_([A-D]0[1-6])', hist_well)            
-            if m is None:
-                errors.append("Histology well name appears to be incorrectly formatted: %s" % lims_edit_href)        
+               well_name_regex_match = re.match(r'(multi|Ephys)_(\d{2})(\d{2})(\d{2})_(2[1-9])_([A-D]0[1-6])', hist_well)            
+            if well_name_regex_match is None:
+                warnings.append("Histology well name appears to be incorrectly formatted: %s" % lims_edit_href)        
             else:
-                yy, mm, dd, plate_n, well = m.groups()[:5]
+                _, yy, mm, dd, plate_n, well = well_name_regex_match.groups()[:5]
                 plate_date = datetime(2000+int(yy), int(mm), int(dd))
                 # find the most recent Monday
                 last_monday  = site_date - timedelta(days=site_date.weekday())

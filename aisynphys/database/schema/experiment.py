@@ -201,6 +201,12 @@ Cell.electrode = relationship(Electrode, back_populates="cell", single_parent=Tr
 
 
 class PairBase(object):
+    @property
+    def ext_id(self):
+        """The external ID for this cell pair (this ID is stable across database versions)
+        """
+        return (self.experiment.ext_id, self.pre_cell.ext_id, self.post_cell.ext_id)
+        
     def __repr__(self):
         uid = getattr(self.experiment, 'ext_id', None)
         if uid is None or uid == '':

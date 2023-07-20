@@ -161,6 +161,7 @@ FLUOROPHORES = {
     'GFP': 'green',
     'EGFP': 'green',
     'AF488': 'green',
+    'AF594': 'red',
     'Cascade Blue': 'blue',
     'YFP': 'yellow',
     'EYFP': 'yellow',
