@@ -921,9 +921,14 @@ class CorrectionMetricFunctions:
         if syn_type not in ['ex', 'in']:
             return np.nan
 
-        p = self.db.query(self.db.Pair).filter(self.db.Pair.id==pair.id).all()[0]
-        n_spikes = getattr(p, 'n_%s_test_spikes' % syn_type)
-        n_spikes = n_spikes if n_spikes <= 800 else 800
+        n_spikes = getattr(pair, f'n_{syn_type}_test_spikes')
+
+        # Experiments with > 800 spikes are more likely to have a connection, since
+        # it's likely the operator chose to collect extra data because a good synapse was present.
+        # Thus, we should not continue trying to fit the connectivity profile for these experiments
+        # as if the expected relationship still applies between n_spikes and connectivity.
+        n_spikes = min(n_spikes, 800)
+
         return n_spikes            
 
 
@@ -942,7 +947,7 @@ class CorrectionMetricFunctions:
     def detection_power(self, pair):
         n_spikes = self.n_test_spikes(pair)
         baseline_noise = self.baseline_noise_stdev(pair)
-        if n_spikes != np.nan and baseline_noise != np.nan:
+        if np.isfinite(n_spikes) and np.isfinite(baseline_noise):
             dp = np.log10(np.sqrt(n_spikes) / baseline_noise)
             if np.isfinite(dp):
                 return dp
