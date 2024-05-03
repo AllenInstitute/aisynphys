@@ -36,7 +36,6 @@ known_addrs = {}
 pipeline = {
     'disable_modules': []
 }
-downloads_url = 'https://raw.githubusercontent.com/AllenInstitute/aisynphys/download_urls/download_urls'
 
 configfile = os.path.join(os.path.dirname(__file__), '..', 'config.yml')
 
