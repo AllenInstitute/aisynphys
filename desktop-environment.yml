@@ -22,4 +22,4 @@ dependencies:
   - pip:
     - lmfit
     - git+https://github.com/pyqtgraph/pyqtgraph
-    # - git+https://github.com/alleninstitute/neuroanalysis
+    - git+https://github.com/alleninstitute/neuroanalysis

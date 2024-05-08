@@ -1,0 +1,1 @@
+Jupyter notebooks used to generate figures for our 2022 Science manuscript can be found in the [figure-notebooks](https://github.com/AllenInstitute/aisynphys/tree/figure-notebooks/doc/figure_notebooks) branch.
