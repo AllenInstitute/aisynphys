@@ -4,32 +4,32 @@ from .util.download import interactive_download
 
 
 _db_versions = None
-def list_db_versions():
-    """Return a list of database versions that are available for download, sorted by release version.
-
-    Each item in the list is a dictionary with keys db_file, release_version, db_size, and schema_version.
-    """
-    global _db_versions
+_url_prefix = None
+def load_dowload_urls():
+    global _db_versions, _url_prefix
     if _db_versions is not None:
         return _db_versions
 
-    # DB urls are stored as a base64-encoded pickle on GitHub.
-    # This allows us to change download URLs without requiring users to pull new code.
-    # The b64 encoding is just intended to prevent bots scraping our URLs
-    b64_urls = urllib.request.urlopen('https://raw.githubusercontent.com/AllenInstitute/aisynphys/download_urls/download_urls').read()
-    version_info = pickle.loads(base64.b64decode(b64_urls))
+    download_info = json.loads(
+        urllib.request.urlopen(config.download_info_url).read()
+    )
+    _url_prefix = download_info['default_url_path']
 
     # parse version and size information from file names
     _db_versions = []
-    for name,desc in version_info.items():
-        # accepted formats are "synphys_rX.Y_size.sqlite" or "synphys_rX.Y-preZ_size.sqlite"
-        #   .. although we do handle one older filename
-        m = re.match('synphys_r(\d+\.\d+(-pre\d+)?)(_2019-08-29)?_(small|medium|full).sqlite', name)
-        assert m is not None, "unsupported DB file name: " + name
-        desc['db_file'] = name
-        desc['release_version'] = m.groups()[0]
-        desc['db_size'] = m.groups()[3]
-        _db_versions.append(desc)
+    for db_version in download_info['databases']:
+        aliases = db_version.get('aliases', [])
+        aliases.append(db_version['file'])
+        for name in aliases:
+            m = re.match('synphys_r(\d+\.\d+(-pre\d+)?)(_2019-08-29)?_(small|medium|full).sqlite', name)
+            assert m is not None, "unsupported DB file name: " + name
+            _db_versions.append({
+                'db_file': name,
+                'url': f'{_url_prefix}/{db_version["file"]}',
+                'schema_version': db_version['schema_version'],
+                'release_version': m.groups()[0],
+                'db_size': m.groups()[3],
+            })
 
     def version_value(desc):
         m = re.match(r'(\d+)\.(\d+)(-pre(\d+))?', desc['release_version'])
@@ -40,6 +40,15 @@ def list_db_versions():
         return val
     _db_versions.sort(key=version_value)
 
+
+def list_db_versions():
+    """Return a list of database versions that are available for download, sorted by release version.
+
+    Each item in the list is a dictionary with keys db_file, release_version, db_size, and schema_version.
+    """
+    global _db_versions
+    if _db_versions is None:
+        load_dowload_urls()
     return _db_versions
 
 
@@ -100,17 +109,16 @@ def get_nwb_path(expt_id):
 
     If the file does not exist locally, then attempt to download.
     """
+    global _url_prefix
     cache_path = os.path.join(config.cache_path, 'raw_data_files', expt_id)
     cache_file = os.path.join(cache_path, 'data.nwb')
     
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
     if not os.path.exists(cache_file):
-        index = get_data_file_index()
-        url = index.get(expt_id, None)
-        if url is None:
-            return None
-        url = "http://api.brain-map.org" + url
+        if _url_prefix is None:
+            load_dowload_urls()
+        url = f'{_url_prefix}/synphys-{expt_id}.nwb'
         interactive_download(url, cache_file)
         
     return cache_file

@@ -208,6 +208,16 @@ class SynphysDatabase(Database):
         
         return slices[0]
 
+    def pair_from_ext_id(self, ext_id, session=None):
+        session = session or self.default_session
+        expt = self.experiment_from_ext_id(ext_id[0], session=session)
+        return expt.pairs[ext_id[1], ext_id[2]]
+    
+    def cell_from_ext_id(self, ext_id, session=None):
+        session = session or self.default_session
+        expt = self.experiment_from_ext_id(ext_id[0], session=session)
+        return expt.cells[ext_id[1]]
+
     def list_experiments(self, session=None):
         session = session or self.default_session
         return session.query(self.Experiment).all()

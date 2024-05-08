@@ -201,11 +201,15 @@ Cell.electrode = relationship(Electrode, back_populates="cell", single_parent=Tr
 
 
 class PairBase(object):
-    def __repr__(self):
+    @property
+    def ext_id(self):
         uid = getattr(self.experiment, 'ext_id', None)
         if uid is None or uid == '':
             uid = str('%0.3f'%self.experiment.acq_timestamp if self.experiment.acq_timestamp is not None else None)
-        return "<%s %s %s %s>" % (self.__class__.__name__, uid, self.pre_cell.ext_id, self.post_cell.ext_id)
+        return uid, self.pre_cell.ext_id, self.post_cell.ext_id
+    
+    def __repr__(self):
+        return "<%s %s %s %s>" % (self.__class__.__name__, *self.ext_id)
 
 
 Pair = make_table(

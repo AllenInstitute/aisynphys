@@ -5,7 +5,7 @@ def interactive_mode():
     
     Can be one of: 'qt', 'ipynb', 'tty', or 'file'.
     """
-    if 'pyqtgraph' in sys.modules and sys.modules['pyqtgraph'].QtGui.QApplication.instance() is not None:
+    if 'pyqtgraph' in sys.modules and sys.modules['pyqtgraph'].QtWidgets.QApplication.instance() is not None:
         return 'qt'
 
     if 'IPython' in sys.modules:
