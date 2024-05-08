@@ -25,6 +25,7 @@ synphys_db = None
 
 
 # utility config, not meant for external use
+download_info_url = 'https://raw.githubusercontent.com/AllenInstitute/aisynphys/download_urls/download_urls.json'
 synphys_data = None  # location of data repo network storage
 synphys_db_host_rw = None  # rw access to postgres / sqlite DB
 synphys_db_readonly_user = "readonly"  # readonly postgres username assigned whrn creating db/tables

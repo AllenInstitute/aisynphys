@@ -208,18 +208,19 @@ class SynphysDatabase(Database):
         
         return slices[0]
 
-    def pair_from_ext_id(self, expt_id, pre_cell_id=None, post_cell_id=None):
-        """Return a Pair instance from (expt_id, pre_cell_id, post_cell_id), or from
-        a single string with all three IDs separated by spaces.
-        """
-        if pre_cell_id is None and post_cell_id is None:
-            parts = expt_id.split(' ')
-            if len(parts) == 3:
-                expt_id, pre_cell_id, post_cell_id = parts
-            else:
-                raise ValueError(f"Invalid pair ID {expt_id}")
-        expt = self.experiment_from_ext_id(expt_id)
-        return expt.pairs[pre_cell_id, post_cell_id]
+    def pair_from_ext_id(self, ext_id: "str|tuple", session=None):
+        if isinstance(ext_id, str):
+            ext_id = ext_id.split(' ')
+        session = session or self.default_session
+        expt = self.experiment_from_ext_id(ext_id[0], session=session)
+        return expt.pairs[ext_id[1], ext_id[2]]
+    
+    def cell_from_ext_id(self, ext_id: "str|tuple", session=None):
+        if isinstance(ext_id, str):
+            ext_id = ext_id.split(' ')
+        session = session or self.default_session
+        expt = self.experiment_from_ext_id(ext_id[0], session=session)
+        return expt.cells[ext_id[1]]
 
     def list_experiments(self, session=None):
         session = session or self.default_session
