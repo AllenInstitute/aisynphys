@@ -5,8 +5,15 @@ def interactive_mode():
     
     Can be one of: 'qt', 'ipynb', 'tty', or 'file'.
     """
-    if 'pyqtgraph' in sys.modules and sys.modules['pyqtgraph'].QtWidgets.QApplication.instance() is not None:
-        return 'qt'
+    try:
+        if 'pyqtgraph' in sys.modules:
+            pg = sys.modules['pyqtgraph']
+            if hasattr(pg, 'QtWidgets') and pg.QtWidgets.QApplication.instance() is not None:
+                return 'qt'
+            elif hasattr(pg, 'Qt') and pg.Qt.QtWidgets.QApplication.instance() is not None:
+                return 'qt'
+    except Exception:
+        pass
 
     if 'IPython' in sys.modules:
         kern = sys.modules['IPython'].get_ipython()
