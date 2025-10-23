@@ -873,10 +873,16 @@ def compose_svg_figure(figure_spec, filename, size, display=False):
     for item in figure_spec:
         subfig = svg.from_mpl(item['figure'], savefig_kw={'bbox_inches':'tight', 'pad_inches':0})
         root = subfig.getroot()
-        root.moveto(item['pos'][0], item['pos'][1], scale=item.get('scale', 1.0))
+        scale = item.get('scale', 1.0)
+        try:
+            root.moveto(item['pos'][0], item['pos'][1], scale_x=scale, scale_y=scale)
+        except TypeError:
+            # older API
+            root.moveto(item['pos'][0], item['pos'][1], scale=scale)
         label = svg.TextElement(item['pos'][0], item['pos'][1], item['label'], **item.get('label_opts', {}))
         fig.append([root, label])
 
+    fig.set_size(size)  # bug? should have been set at init, but seems to be necessary here.
     fig.save(filename)
 
     if display:
