@@ -319,7 +319,7 @@ class Experiment(object):
 
             # sort by frequency
             def freq(stim):
-                m = re.match('(.*)(\d+)Hz', stim)
+                m = re.match(r'(.*)(\d+)Hz', stim)
                 if m is None:
                     return (0, 0)
                 else:
@@ -392,7 +392,7 @@ class Experiment(object):
                 assert label not in cell.labels
                 if value == '':
                     continue
-                m = re.match('(x)?(\+|\-)?(\?)?', value)
+                m = re.match(r'(x)?(\+|\-)?(\?)?', value)
                 if m is None:
                     raise Exception('Invalid label record for "%s": %s' % (label, value))
 
@@ -464,7 +464,7 @@ class Experiment(object):
                 for post_id in conns:
                     # allow tentative connections like "4?"
                     if isinstance(post_id, str):
-                        m = re.match("^(\d+)(\?)?$", post_id)
+                        m = re.match(r"^(\d+)(\?)?$", post_id)
                         if m is None:
                             post_id = None  # triggers ValueError below
                         else:
@@ -611,7 +611,7 @@ class Experiment(object):
             line = ch.lines[0]
             # line looks like "sim1: 1+ 2-'
 
-            parts = re.split('\s+', line)
+            parts = re.split(r'\s+', line)
 
             # first part is label / cre type and a colon
             assert parts[0].endswith(':')
@@ -628,7 +628,7 @@ class Experiment(object):
                 continue
 
             for part in parts[1:]:
-                m = re.match('(\d+)(x)?(\+|\-)?(\?)?', part)
+                m = re.match(r'(\d+)(x)?(\+|\-)?(\?)?', part)
                 if m is None:
                     raise Exception('invalid label record: %s' % part)
                 grps = m.groups()
@@ -675,7 +675,7 @@ class Experiment(object):
         """
         qc = {}
         for ch in entry.children:
-            parts = re.split('\s+', ch.lines[0].strip())
+            parts = re.split(r'\s+', ch.lines[0].strip())
             for part in parts[1:]:
                 m = re.match(r'(\d+)(\+|\/|\-|\?)', part)
                 if m is None:
@@ -805,7 +805,7 @@ class Experiment(object):
             raise TypeError("Multiple marker items found in site mosaic file %s" % sitefile)
         cells = marker_items[0]['markers']
         for name, pos in cells:
-            m = re.match("\D+(\d+)", name)
+            m = re.match(r"\D+(\d+)", name)
             cid = str(int(m.group(1)))
             if cid in self.cells:
                 self.cells[cid].position = pos

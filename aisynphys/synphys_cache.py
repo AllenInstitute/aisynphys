@@ -21,7 +21,7 @@ def load_dowload_urls():
         aliases = db_version.get('aliases', [])
         aliases.append(db_version['file'])
         for name in aliases:
-            m = re.match('synphys_r(\d+\.\d+(-pre\d+)?)(_2019-08-29)?_(small|medium|full).sqlite', name)
+            m = re.match(r'synphys_r(\d+\.\d+(-pre\d+)?)(_2019-08-29)?_(small|medium|full).sqlite', name)
             assert m is not None, "unsupported DB file name: " + name
             _db_versions.append({
                 'db_file': name,
