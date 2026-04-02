@@ -97,6 +97,24 @@ class ExperimentWriter:
 
             ds_tuple[2] += n  # update size
 
+        # Build cell_id to electrode mapping
+        cell_to_electrode = {}
+        for elec_id, elec in expt.electrodes.items():
+            if elec.cell is not None:
+                cell_to_electrode[elec.cell.id] = elec_id
+
+        # Build postsynaptic cell to presynaptic electrodes mapping
+        presynaptic_electrodes = {}
+        for pair in expt.pair_list:
+            if pair.synapse:
+                post_cell_id = pair.post_cell_id
+                pre_cell_id = pair.pre_cell_id
+                pre_electrode = cell_to_electrode.get(pre_cell_id)
+                if pre_electrode is not None:
+                    if post_cell_id not in presynaptic_electrodes:
+                        presynaptic_electrodes[post_cell_id] = []
+                    presynaptic_electrodes[post_cell_id].append(pre_electrode)
+
         with expt.data as data_file:
             syn_index = self.build_synapse_index(expt)
             for electrode in expt.data.contents[0].devices:
@@ -142,33 +160,30 @@ class ExperimentWriter:
                             sample_interval = np.round(meta['Minimum Sampling interval'] * 1e-3, 6)
 
                         mask = np.zeros_like(sweep_data, dtype=bool)
-                        stimulus_info = False
 
-                        # --- stimulus blanking ---
-                        for item in recording.stimulus.items:
-                            if item.description == 'test pulse':
-                                start = int(item.start_time / sample_interval) - 2
-                                end = int((item.start_time + item.duration * 2) / sample_interval)
-                                mask[max(start, 0):min(end, len(mask))] = True
+                        # --- stimulus blanking (current electrode) ---
+                        self._blank_recording(recording, mask, sample_interval, self.BLANK_ADD_TIME)
 
-                            elif item.type == 'SquarePulseTrain':
-                                stimulus_info = True
-                                segments = self.get_blank_segments(
-                                    item,
-                                    sample_interval,
-                                    self.BLANK_ADD_TIME / sample_interval
-                                )
-                                for start, stop in segments:
-                                    mask[max(start - 2, 0):min(stop + 5, len(mask))] = True
+                        # --- stimulus blanking (neighboring electrodes) ---
+                        for neighbor in (electrode - 1, electrode + 1):
+                            ix = device_map.get(neighbor)
+                            if ix is None:
+                                continue
+                            try:
+                                self._blank_recording(sweep.recordings[ix], mask, sample_interval, 0)
+                            except Exception:
+                                continue
 
-                        if not stimulus_info:
-                            cmd = sweep.recordings[device_ix]['command'].data
-                            segments = self.get_blank_segments_from_cmd_trace(
-                                cmd,
-                                self.BLANK_ADD_TIME / sample_interval
-                            )
-                            for start, stop in segments:
-                                mask[max(start - 2, 0):min(stop + 5, len(mask))] = True
+                        # --- stimulus blanking (presynaptic electrodes) ---
+                        pre_elecs = presynaptic_electrodes.get(cell_id, [])
+                        for pre_elec in pre_elecs:
+                            ix = device_map.get(pre_elec)
+                            if ix is None:
+                                continue
+                            try:
+                                self._blank_recording(sweep.recordings[ix], mask, sample_interval, 0)
+                            except Exception:
+                                continue
 
                         # create dataset ONLY when first real data appears
                         ds_tuple = get_or_create_dataset(
@@ -395,6 +410,36 @@ class ExperimentWriter:
         })
 
         return results
+
+    def _blank_recording(self, recording, mask, sample_interval, blank_add_time):
+        stimulus_info = False
+        for item in recording.stimulus.items:
+            if item.description == 'test pulse':
+                start = int(item.start_time / sample_interval) - 2
+                end = int((item.start_time + item.duration * 2) / sample_interval)
+                mask[max(start, 0):min(end, len(mask))] = True
+
+            elif item.type == 'SquarePulseTrain':
+                stimulus_info = True
+                segments = self.get_blank_segments(
+                    item,
+                    sample_interval,
+                    blank_add_time / sample_interval
+                )
+                for start, stop in segments:
+                    mask[max(start - 2, 0):min(stop + 5, len(mask))] = True
+
+        if not stimulus_info:
+            try:
+                cmd = recording['command'].data
+                segments = self.get_blank_segments_from_cmd_trace(
+                    cmd,
+                    self.BLANK_ADD_TIME / sample_interval
+                )
+                for start, stop in segments:
+                    mask[max(start - 2, 0):min(stop + 5, len(mask))] = True
+            except (KeyError, AttributeError, ValueError):
+                pass
 
     def extract_electrode_metadata(self, expt, electrode, syn_index):
         cell = expt.electrodes[electrode].cell
