@@ -16,6 +16,71 @@ class ExperimentWriter:
     def __init__(self, output_dir="output"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True, parents=True)
+        self._h5f = None
+        self._datasets = {}
+        self._metadata_store = {}
+
+    def _get_or_create_dataset(self, out_file, cell_name, signal_key, dtype, electrode, expt):
+        if self._h5f is None:
+            self._h5f = h5py.File(out_file, "w")
+            # Disable HDF5 chunk cache to prevent memory accumulation
+            self._h5f.id.set_chunk_cache(0, 0, 0)
+
+        key = (cell_name, signal_key)
+        if key in self._datasets:
+            return self._datasets[key]
+
+        grp = self._h5f.require_group(cell_name)
+        if "electrode" not in grp.attrs:
+            grp.attrs["cell_id"] = cell_name
+            grp.attrs["expt_ext_id"] = self.safe_attr(getattr(expt, "ext_id", None))
+            grp.attrs["species"] = self.safe_attr(getattr(expt.slice, "species", None))
+            grp.attrs["age"] = self.safe_attr(getattr(expt.slice, "age", None))
+            grp.attrs["electrode"] = electrode
+            grp.attrs["cell_ext_id"] = self.safe_attr(expt.electrodes[electrode].cell.ext_id)
+            grp.attrs["holding_potentials"] = list(self.CONDITIONS.values())
+            grp.attrs["sampling_rate_unit"] = "seconds"
+            grp.attrs["signal_unit"] = "pA"
+
+        subgrp = grp.require_group(signal_key)
+        data_ds = subgrp.create_dataset(
+            "data",
+            shape=(0,),
+            maxshape=(None,),
+            dtype=dtype,
+            chunks=(self.CHUNK_SIZE,),
+            compression=self.COMPRESSION,
+            compression_opts=self.COMPRESSION_OPTS,
+        )
+
+        mask_ds = subgrp.create_dataset(
+            "mask",
+            shape=(0,),
+            maxshape=(None,),
+            dtype=bool,
+            chunks=(self.CHUNK_SIZE,),
+            compression=self.COMPRESSION,
+            compression_opts=self.COMPRESSION_OPTS,
+        )
+
+        self._datasets[key] = [data_ds, mask_ds, 0]
+        self._metadata_store[key] = {
+            "n_sweeps": 0,
+            "sweep_lengths": [],
+            "sampling_intervals": [],
+            "n_samples": 0,
+        }
+        return self._datasets[key]
+
+    @staticmethod
+    def _append_data(ds_tuple, new_data, new_mask):
+        data_ds, mask_ds, size = ds_tuple
+        n = len(new_data)
+        data_ds.resize(size + n, axis=0)
+        mask_ds.resize(size + n, axis=0)
+        data_ds[size:size + n] = new_data
+        mask_ds[size:size + n] = new_mask
+        ds_tuple[2] += n  # update size
 
     def write(self, expt):
         if expt.data is None:
@@ -24,78 +89,10 @@ class ExperimentWriter:
         exp_name = f"exp_{expt.id:05d}"
         out_file = self.output_dir / f"{exp_name}.h5"
 
-        h5f = None  # lazy open
-        datasets = {}  # (cell_name, signal_key) -> [data_ds, mask_ds, current_size]
-        metadata_store = {}  # (cell_name, signal_key) -> metadata dict
+        self._h5f = None
+        self._datasets = {}
+        self._metadata_store = {}
         metadata_rows = []
-
-        def get_or_create_dataset(cell_name, signal_key, dtype, electrode):
-            nonlocal h5f
-
-            if h5f is None:
-                h5f = h5py.File(out_file, "w")
-                # Disable HDF5 chunk cache to prevent memory accumulation
-                h5f.id.set_chunk_cache(0, 0, 0)
-
-            key = (cell_name, signal_key)
-
-            if key in datasets:
-                return datasets[key]
-
-            grp = h5f.require_group(cell_name)
-            if "electrode" not in grp.attrs:
-                grp.attrs["cell_id"] = cell_name
-                grp.attrs["expt_ext_id"] = self.safe_attr(getattr(expt, "ext_id", None))
-                grp.attrs["species"] = self.safe_attr(getattr(expt.slice, "species", None))
-                grp.attrs["age"] = self.safe_attr(getattr(expt.slice, "age", None))
-                grp.attrs["electrode"] = electrode
-                grp.attrs["cell_ext_id"] = self.safe_attr(expt.electrodes[electrode].cell.ext_id)
-                grp.attrs["holding_potentials"] = list(self.CONDITIONS.values())
-                grp.attrs["sampling_rate_unit"] = "seconds"
-                grp.attrs["signal_unit"] = "pA"
-
-            subgrp = grp.require_group(signal_key)
-
-            data_ds = subgrp.create_dataset(
-                "data",
-                shape=(0,),
-                maxshape=(None,),
-                dtype=dtype,
-                chunks=(self.CHUNK_SIZE,),
-                compression=self.COMPRESSION,
-                compression_opts=self.COMPRESSION_OPTS,
-            )
-
-            mask_ds = subgrp.create_dataset(
-                "mask",
-                shape=(0,),
-                maxshape=(None,),
-                dtype=bool,
-                chunks=(self.CHUNK_SIZE,),
-                compression=self.COMPRESSION,
-                compression_opts=self.COMPRESSION_OPTS,
-            )
-
-            datasets[key] = [data_ds, mask_ds, 0]
-            metadata_store[key] = {
-                "n_sweeps": 0,
-                "sweep_lengths": [],
-                "sampling_intervals": [],
-                "n_samples": 0,
-            }
-            return datasets[key]
-
-        def append_data(ds_tuple, new_data, new_mask):
-            data_ds, mask_ds, size = ds_tuple
-            n = len(new_data)
-
-            data_ds.resize(size + n, axis=0)
-            mask_ds.resize(size + n, axis=0)
-
-            data_ds[size:size + n] = new_data
-            mask_ds[size:size + n] = new_mask
-
-            ds_tuple[2] += n  # update size
 
         # Build cell_id to electrode mapping
         cell_to_electrode = {}
@@ -117,6 +114,11 @@ class ExperimentWriter:
 
         with expt.data as data_file:
             syn_index = self.build_synapse_index(expt)
+            sweep_index = self.index_sweeps(data_file)
+
+            # Pre-fetch temperature once safely
+            temp = self.get_temperature(data_file)
+
             for electrode in expt.data.contents[0].devices:
                 if expt.electrodes[electrode].cell is None:
                     continue
@@ -132,7 +134,7 @@ class ExperimentWriter:
                     if cell_key not in expt.cells:
                         continue
 
-                    sweep_indices = self.get_vc_sweep_indices(data_file, electrode, v_hold)
+                    sweep_indices = sweep_index.get(electrode, {}).get(v_hold, [])
                     if len(sweep_indices) == 0:
                         continue
 
@@ -150,8 +152,7 @@ class ExperimentWriter:
                         recording = sweep.recordings[device_ix]
 
                         # Ensure data is cast to float32 and scaled to standard units
-                        scaling = 1e3 if recording['primary'].units == 'V' else 1e12
-                        sweep_data = (recording['primary'].data * scaling).astype('float32')
+                        sweep_data = self.scale_recording(recording)
 
                         meta = sweep.recording_dict[electrode].meta['notebook']
                         if 'Sampling interval' in meta:
@@ -186,17 +187,19 @@ class ExperimentWriter:
                                 continue
 
                         # create dataset ONLY when first real data appears
-                        ds_tuple = get_or_create_dataset(
+                        ds_tuple = self._get_or_create_dataset(
+                            out_file,
                             cell_name,
                             signal_key,
                             sweep_data.dtype,
-                            electrode
+                            electrode,
+                            expt
                         )
 
                         # append immediately (no buffering)
-                        append_data(ds_tuple, sweep_data, mask)
+                        self._append_data(ds_tuple, sweep_data, mask)
 
-                        meta_dict = metadata_store[(cell_name, signal_key)]
+                        meta_dict = self._metadata_store[(cell_name, signal_key)]
                         meta_dict["n_sweeps"] += 1
                         meta_dict["sweep_lengths"].append(len(sweep_data))
                         meta_dict["sampling_intervals"].append(sample_interval)
@@ -211,7 +214,7 @@ class ExperimentWriter:
                             if tp.access_resistance is not None:
                                 passive_cache["rseries"].append(tp.access_resistance)
 
-                row = self.extract_electrode_metadata(expt, electrode, syn_index)
+                row = self.extract_electrode_metadata(expt, electrode, syn_index, temp)
 
                 # overwrite passive with cached version
                 row.update({
@@ -223,7 +226,7 @@ class ExperimentWriter:
                 metadata_rows.append(row)
 
         # --- finalize ---
-        if h5f is None:
+        if self._h5f is None:
             return {
                 "expt_id": expt.id,
                 "ext_id": getattr(expt, "ext_id", None),
@@ -232,14 +235,38 @@ class ExperimentWriter:
                 "status": "no_data",
             }
 
-        for (cell_name, signal_key), meta in metadata_store.items():
-            grp = h5f[cell_name][signal_key]
+        self._finalize_metadata(metadata_rows)
+
+        self._h5f.flush()
+        self._h5f.close()
+        self._h5f = None
+
+        # Explicit garbage collection to prevent memory accumulation
+        gc.collect()
+
+        cells_with_data = {
+          cell_name for (cell_name, _) in self._metadata_store.keys()
+        }
+        n_cells = len(cells_with_data)
+
+        result = {
+            "expt_id": expt.id,
+            "ext_id": getattr(expt, "ext_id", None),
+            "n_cells": n_cells,
+            "output_file": str(out_file),
+            "status": "OK"
+        }
+
+        return result
+
+    def _finalize_metadata(self, metadata_rows):
+        for (cell_name, signal_key), meta in self._metadata_store.items():
+            grp = self._h5f[cell_name][signal_key]
 
             sweep_lengths = np.array(meta["sweep_lengths"], dtype=np.int32)
             sampling_intervals = np.array(meta["sampling_intervals"], dtype=np.float32)
 
             duration_s = float(np.sum(sweep_lengths * sampling_intervals))
-
             cond_idx = self.SIGNAL_KEYS.index(signal_key)
 
             grp.attrs["n_sweeps"] = meta["n_sweeps"]
@@ -250,11 +277,9 @@ class ExperimentWriter:
             grp.attrs["duration_s"] = duration_s
             grp.attrs["voltage_mV"] = self.CONDITIONS.get(cond_idx, np.nan)
 
-
         if metadata_rows:
             keys = sorted(metadata_rows[0].keys())
-
-            grp = h5f.require_group("metadata_table")
+            grp = self._h5f.require_group("metadata_table")
 
             for key in keys:
                 col = [row.get(key) for row in metadata_rows]
@@ -279,56 +304,49 @@ class ExperimentWriter:
                         [str(v) if v is not None else "" for v in col],
                         dtype="S"
                     )
-
                 grp.create_dataset(key, data=data)
 
-        h5f.flush()
-        h5f.close()
-
-        # Explicit garbage collection to prevent memory accumulation
-        gc.collect()
-
-        cells_with_data = {
-          cell_name for (cell_name, _) in metadata_store.keys()
-        }
-        n_cells = len(cells_with_data)
-
-        result = {
-            "expt_id": expt.id,
-            "ext_id": getattr(expt, "ext_id", None),
-            "n_cells": n_cells,
-            "output_file": str(out_file),
-            "status": "OK"
-        }
-
-        return result
+    @staticmethod
+    def get_temperature(data_file):
+        """Safely extract temperature from the first sweep in the data file."""
+        try:
+            # Try to get temperature from the first sweep
+            # Using the first available electrode
+            first_sweep = data_file.contents[0]
+            first_elec = first_sweep.devices[0]
+            temp = first_sweep.recording_dict[first_elec].meta['notebook']['Async AD 1: Bath Temperature']
+            return temp
+        except Exception:
+            return None
 
     @staticmethod
-    def get_vc_sweep_indices(data_file, electrode_id, v_hold=None):
-        sweep_indices = []
+    def index_sweeps(data_file):
+        """Pre-index sweeps in the data file for faster lookup.
 
+        Returns a nested dictionary: {electrode_id: {holding_potential: [sweep_indices]}}
+        """
+        index = {}
         for sweep in data_file.contents:
-            devices = sweep.devices
-            if electrode_id not in devices:
-                continue
+            for electrode_id in sweep.devices:
+                device_ix = sweep.devices.index(electrode_id)
+                rec = sweep.recordings[device_ix]
 
-            device_ix = devices.index(electrode_id)
-            rec = sweep.recordings[device_ix]
+                if rec.clamp_mode != 'vc':
+                    continue
 
-            if rec.clamp_mode != 'vc':
-                continue
+                stim = rec.stimulus.description
+                if stim in ['MIES_Blowout_DA_0', 'Chirp_DA_0', 'Mixedf_DA_0']:
+                    holding = 'NaN'
+                else:
+                    holding = np.round(rec.holding_potential * 1e3)
 
-            stim = rec.stimulus.description
+                if electrode_id not in index:
+                    index[electrode_id] = {}
+                if holding not in index[electrode_id]:
+                    index[electrode_id][holding] = []
+                index[electrode_id][holding].append(sweep.key)
 
-            if stim in ['MIES_Blowout_DA_0', 'Chirp_DA_0', 'Mixedf_DA_0']:
-                holding = 'NaN'
-            else:
-                holding = np.round(rec.holding_potential * 1e3)
-
-            if holding == v_hold:
-                sweep_indices.append(sweep.key)
-
-        return sweep_indices
+        return index
 
     @staticmethod
     def get_blank_segments_from_cmd_trace(stim_data, extra_points):
@@ -354,6 +372,12 @@ class ExperimentWriter:
             pulses.append((int(start/sample_interval), int(stop/sample_interval) + int(extra_points)))
 
         return pulses
+
+    @staticmethod
+    def scale_recording(recording):
+        """Scale recording data to standard units (pA or mV) and cast to float32."""
+        scaling = 1e3 if recording['primary'].units == 'V' else 1e12
+        return (recording['primary'].data * scaling).astype('float32')
 
     @staticmethod
     def safe_attr(value):
@@ -441,18 +465,12 @@ class ExperimentWriter:
             except (KeyError, AttributeError, ValueError):
                 pass
 
-    def extract_electrode_metadata(self, expt, electrode, syn_index):
+    def extract_electrode_metadata(self, expt, electrode, syn_index, temperature=None):
         cell = expt.electrodes[electrode].cell
         morph = getattr(cell, "morphology", None)
         loc = getattr(cell, "cortical_location", None)
         intrinsic = getattr(cell, "intrinsic", None)
         elec = cell.electrode
-
-        # Pre-fetch temperature once safely
-        try:
-            temp = expt.data.contents[0].recording_dict[electrode].meta['notebook']['Async AD 1: Bath Temperature']
-        except Exception:
-            temp = None
 
         row = {
             # --- Cell ---
@@ -482,7 +500,7 @@ class ExperimentWriter:
             "age": getattr(expt.slice, "age", None),
             "sex": getattr(expt.slice, "sex", None),
             "hemisphere": getattr(expt.slice, "hemisphere", None),
-            "temperature_c": temp,
+            "temperature_c": temperature,
 
             # --- Electrode ---
             "device_id": elec.device_id,
