@@ -3,44 +3,9 @@ import gc
 import h5py
 import numpy as np
 from pathlib import Path
+from .constants import INTRINSIC_FIELDS
 
 class ExperimentWriter:
-    INTRINSIC_FIELDS = [
-        "rheobase",
-        "fi_slope",
-        "input_resistance",
-        "input_resistance_ss",
-        "sag",
-        "tau",
-        "sag_peak_t",
-        "sag_depol",
-        "sag_peak_t_depol",
-        "ap_upstroke_downstroke_ratio",
-        "ap_width",
-        "ap_upstroke",
-        "ap_downstroke",
-        "ap_threshold_v",
-        "ap_peak_deltav",
-        "ap_fast_trough_deltav",
-        "firing_rate_rheo",
-        "latency_rheo",
-        "firing_rate_40pa",
-        "latency_40pa",
-        "adaptation_index",
-        "isi_cv",
-        "chirp_peak_freq",
-        "chirp_3db_freq",
-        "chirp_peak_ratio",
-        "chirp_peak_impedance",
-        "chirp_sync_freq",
-        "chirp_inductive_phase",
-        "isi_adapt_ratio",
-        "upstroke_adapt_ratio",
-        "downstroke_adapt_ratio",
-        "width_adapt_ratio",
-        "threshold_v_adapt_ratio",
-    ]
-
     CONDITIONS = {0: -55, 1: -70}
     BLANK_ADD_TIME = 0.02
     CHUNK_SIZE = 50_000
@@ -480,10 +445,10 @@ class ExperimentWriter:
 
         # --- Intrinsic ---
         if intrinsic is not None:
-            for field in self.INTRINSIC_FIELDS:
+            for field in INTRINSIC_FIELDS:
                 row[f"intrinsic_{field}"] = getattr(intrinsic, field, None)
         else:
-            for field in self.INTRINSIC_FIELDS:
+            for field in INTRINSIC_FIELDS:
                 row[f"intrinsic_{field}"] = None
 
         # --- Synaptic ---

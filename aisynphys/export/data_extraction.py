@@ -7,44 +7,7 @@ import shutil
 import numpy as np
 import multiprocessing as mp
 from pathlib import Path
-
-
-
-INTRINSIC_FIELDS = [
-    "rheobase",
-    "fi_slope",
-    "input_resistance",
-    "input_resistance_ss",
-    "sag",
-    "tau",
-    "sag_peak_t",
-    "sag_depol",
-    "sag_peak_t_depol",
-    "ap_upstroke_downstroke_ratio",
-    "ap_width",
-    "ap_upstroke",
-    "ap_downstroke",
-    "ap_threshold_v",
-    "ap_peak_deltav",
-    "ap_fast_trough_deltav",
-    "firing_rate_rheo",
-    "latency_rheo",
-    "firing_rate_40pa",
-    "latency_40pa",
-    "adaptation_index",
-    "isi_cv",
-    "chirp_peak_freq",
-    "chirp_3db_freq",
-    "chirp_peak_ratio",
-    "chirp_peak_impedance",
-    "chirp_sync_freq",
-    "chirp_inductive_phase",
-    "isi_adapt_ratio",
-    "upstroke_adapt_ratio",
-    "downstroke_adapt_ratio",
-    "width_adapt_ratio",
-    "threshold_v_adapt_ratio",
-]
+from .constants import INTRINSIC_FIELDS
 
 
 def get_vc_sweep_indices(data_file, electrode_id, v_hold=None):
@@ -216,8 +179,7 @@ def extract_electrode_metadata(expt, electrode, syn_index):
     return row
 
 
-
-    OUTPUT_DIR = Path("output")
+OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 CONDITIONS = {0: -55, 1: -70}
