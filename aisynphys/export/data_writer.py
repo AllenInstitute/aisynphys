@@ -20,7 +20,7 @@ class ExperimentWriter:
         self._datasets = {}
         self._metadata_store = {}
 
-    def _get_or_create_dataset(self, out_file, cell_name, signal_key, dtype, electrode, expt):
+    def _get_or_create_dataset(self, out_file, cell_name, signal_key, dtype, electrode_obj, expt):
         if self._h5f is None:
             self._h5f = h5py.File(out_file, "w")
             # Disable HDF5 chunk cache to prevent memory accumulation
@@ -36,8 +36,8 @@ class ExperimentWriter:
             grp.attrs["expt_ext_id"] = self.safe_attr(getattr(expt, "ext_id", None))
             grp.attrs["species"] = self.safe_attr(getattr(expt.slice, "species", None))
             grp.attrs["age"] = self.safe_attr(getattr(expt.slice, "age", None))
-            grp.attrs["electrode"] = electrode
-            grp.attrs["cell_ext_id"] = self.safe_attr(expt.electrodes[electrode].cell.ext_id)
+            grp.attrs["electrode"] = electrode_obj.device_id
+            grp.attrs["cell_ext_id"] = self.safe_attr(electrode_obj.cell.ext_id)
             grp.attrs["holding_potentials"] = list(self.CONDITIONS.values())
             grp.attrs["sampling_rate_unit"] = "seconds"
             grp.attrs["signal_unit"] = "pA"
@@ -94,23 +94,35 @@ class ExperimentWriter:
         self._metadata_store = {}
         metadata_rows = []
 
-        # Build cell_id to electrode mapping
-        cell_to_electrode = {}
-        for elec_id, elec in expt.electrodes.items():
+        # Build electrode mapping: device_id -> electrode object
+        # and cell_id -> device_id mapping
+        dev_to_elec = {}
+        cell_to_dev = {}
+
+        electrodes = expt.electrodes
+        if hasattr(electrodes, 'values'):
+            electrodes = electrodes.values()
+
+        for elec in electrodes:
+            dev_to_elec[elec.device_id] = elec
             if elec.cell is not None:
-                cell_to_electrode[elec.cell.id] = elec_id
+                # Use cell.id for database models, fallback to cell_id for data.Experiment
+                cell_id = getattr(elec.cell, 'id', getattr(elec.cell, 'cell_id', None))
+                if cell_id is not None:
+                    cell_to_dev[cell_id] = elec.device_id
 
         # Build postsynaptic cell to presynaptic electrodes mapping
         presynaptic_electrodes = {}
-        for pair in expt.pair_list:
-            if pair.synapse:
+        pair_list = getattr(expt, 'pair_list', [])
+        for pair in pair_list:
+            if pair.has_synapse:
                 post_cell_id = pair.post_cell_id
                 pre_cell_id = pair.pre_cell_id
-                pre_electrode = cell_to_electrode.get(pre_cell_id)
-                if pre_electrode is not None:
+                pre_device_id = cell_to_dev.get(pre_cell_id)
+                if pre_device_id is not None:
                     if post_cell_id not in presynaptic_electrodes:
                         presynaptic_electrodes[post_cell_id] = []
-                    presynaptic_electrodes[post_cell_id].append(pre_electrode)
+                    presynaptic_electrodes[post_cell_id].append(pre_device_id)
 
         with expt.data as data_file:
             syn_index = self.build_synapse_index(expt)
@@ -119,22 +131,23 @@ class ExperimentWriter:
             # Pre-fetch temperature once safely
             temp = self.get_temperature(data_file)
 
-            for electrode in expt.data.contents[0].devices:
-                if expt.electrodes[electrode].cell is None:
+            for device_id in expt.data.contents[0].devices:
+                elec_obj = dev_to_elec.get(device_id)
+                if elec_obj is None or elec_obj.cell is None:
                     continue
 
-                cell_id = expt.electrodes[electrode].cell.id
+                cell_id = getattr(elec_obj.cell, 'id', getattr(elec_obj.cell, 'cell_id', None))
                 cell_name = f"cell_{cell_id:06d}"
 
                 passive_cache = {"cap": [], "rin": [], "rseries": []}
 
                 for cond_idx, v_hold in self.CONDITIONS.items():
-                    cell_key = str(electrode + 1)
+                    cell_key = str(device_id + 1)
 
                     if cell_key not in expt.cells:
                         continue
 
-                    sweep_indices = sweep_index.get(electrode, {}).get(v_hold, [])
+                    sweep_indices = sweep_index.get(device_id, {}).get(v_hold, [])
                     if len(sweep_indices) == 0:
                         continue
 
@@ -144,11 +157,11 @@ class ExperimentWriter:
                         sweep = data_file.contents[sweep_ix]
 
                         devices = sweep.devices
-                        if electrode not in devices:
+                        if device_id not in devices:
                             continue
 
                         device_map = {d: i for i, d in enumerate(devices)}
-                        device_ix = device_map[electrode]
+                        device_ix = device_map[device_id]
                         recording = sweep.recordings[device_ix]
 
                         # Ensure data is cast to float32 and scaled to standard units
@@ -192,7 +205,7 @@ class ExperimentWriter:
                             cell_name,
                             signal_key,
                             sweep_data.dtype,
-                            electrode,
+                            elec_obj,
                             expt
                         )
 
@@ -214,7 +227,7 @@ class ExperimentWriter:
                             if tp.access_resistance is not None:
                                 passive_cache["rseries"].append(tp.access_resistance)
 
-                row = self.extract_electrode_metadata(expt, electrode, syn_index, temp)
+                row = self.extract_electrode_metadata(expt, elec_obj, syn_index, temp)
 
                 # overwrite passive with cached version
                 row.update({
@@ -465,8 +478,8 @@ class ExperimentWriter:
             except (KeyError, AttributeError, ValueError):
                 pass
 
-    def extract_electrode_metadata(self, expt, electrode, syn_index, temperature=None):
-        cell = expt.electrodes[electrode].cell
+    def extract_electrode_metadata(self, expt, electrode_obj, syn_index, temperature=None):
+        cell = electrode_obj.cell
         morph = getattr(cell, "morphology", None)
         loc = getattr(cell, "cortical_location", None)
         intrinsic = getattr(cell, "intrinsic", None)

@@ -33,9 +33,10 @@ def mock_expt():
 
     # Mock electrodes
     elec1 = MagicMock()
+    elec1.device_id = 0
     elec1.cell.id = 101
     elec1.cell.ext_id = "cell_ext_101"
-    elec1.cell.electrode = MagicMock(device_id=0)
+    elec1.cell.electrode = elec1
 
     expt.electrodes = {0: elec1}
     expt.cells = {"1": MagicMock()} # Electrode 0 corresponds to cell_key "1"
